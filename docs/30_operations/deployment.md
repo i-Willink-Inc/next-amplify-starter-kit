@@ -142,6 +142,29 @@ USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
 
 ---
 
+## 前提となる権限設定
+
+デプロイには以下の権限が必要です。
+
+### 1. AWS IAM 権限（Deployer）
+
+CDK デプロイを実行する IAM ユーザーまたはロールには、以下の権限が必要です。
+最も簡単な推奨設定は **`AdministratorAccess`** ポリシーの付与です。
+
+最小権限で運用する場合は、以下のサービスへのフルアクセスが必要です：
+- **CloudFormation**: スタックの作成・更新
+- **S3**: アセットファイルのアップロード
+- **IAM**: Amplify 用ロールの作成 (PassRole 含む)
+- **Amplify**: アプリ・ブランチ・バックエンドの作成
+- **Secrets Manager**: 読み取り権限（Secrets Manager 利用時）
+- **SSM**: CDK Bootstrap 関連パラメータの読み取り
+
+### 2. GitHub Personal Access Token (PAT)
+
+`repo` と `admin:repo_hook` のスコープが必要です（[手順1](#1-github-personal-access-token-pat-の作成)参照）。
+
+---
+
 ## 必要な設定一覧
 
 ### Secrets Manager 使用時（推奨）
