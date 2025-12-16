@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'infra/**'
+      - 'amplify.yml'
       - '.github/workflows/deploy-infra.yml'
   workflow_dispatch:
     inputs:
@@ -66,10 +67,14 @@ jobs:
 
       - name: CDK Diff
         working-directory: infra
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: npx cdk diff
 
       - name: CDK Deploy
         working-directory: infra
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
 
       - name: Upload CDK Outputs
