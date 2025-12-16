@@ -1,0 +1,7 @@
+node_modules
+.next
+dist
+cdk.out
+pnpm-lock.yaml
+*.min.js
+*.min.css
