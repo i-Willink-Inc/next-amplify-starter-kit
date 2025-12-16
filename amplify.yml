@@ -11,8 +11,11 @@ applications:
         build:
           commands:
             - pnpm build
+            # Copy static files to standalone output (required for Next.js standalone)
+            - cp -r .next/static .next/standalone/apps/web/.next/static
+            - cp -r public .next/standalone/apps/web/public 2>/dev/null || true
       artifacts:
-        baseDirectory: .next/standalone
+        baseDirectory: .next/standalone/apps/web
         files:
           - '**/*'
       cache:
