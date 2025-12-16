@@ -17,6 +17,14 @@ on:
         options:
           - production
           - staging
+      use_secrets_manager:
+        description: 'Use Secrets Manager for GitHub token (recommended)'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   id-token: write
@@ -48,7 +56,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 方法1: OIDC認証 (AWS_ROLE_ARN が設定されている場合)
+      # 方法1: OIDC認証
       - name: Configure AWS Credentials (OIDC)
         if: ${{ vars.AUTH_METHOD == 'OIDC' || (secrets.AWS_ROLE_ARN != '' && vars.AUTH_METHOD != 'ACCESS_KEY') }}
         uses: aws-actions/configure-aws-credentials@v4
@@ -56,7 +64,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 方法2: アクセスキー認証 (ACCESS_KEY が設定されている場合)
+      # 方法2: アクセスキー認証
       - name: Configure AWS Credentials (Access Key)
         if: ${{ vars.AUTH_METHOD == 'ACCESS_KEY' || (secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_ROLE_ARN == '') }}
         uses: aws-actions/configure-aws-credentials@v4
@@ -68,12 +76,16 @@ jobs:
       - name: CDK Diff
         working-directory: infra
         env:
+          # デフォルト: Secrets Manager を使用（推奨）
+          # USE_SECRETS_MANAGER=false の場合: GITHUB_TOKEN 環境変数を使用
+          USE_SECRETS_MANAGER: ${{ github.event.inputs.use_secrets_manager || 'true' }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: npx cdk diff
 
       - name: CDK Deploy
         working-directory: infra
         env:
+          USE_SECRETS_MANAGER: ${{ github.event.inputs.use_secrets_manager || 'true' }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
 
