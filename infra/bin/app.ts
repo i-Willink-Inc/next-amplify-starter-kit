@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+import 'source-map-support/register';
+import * as dotenv from 'dotenv';
+// Load environment variables from .env file
+dotenv.config();
+
 import * as cdk from 'aws-cdk-lib';
 import { AmplifyStack } from '../lib/amplify-stack';
 

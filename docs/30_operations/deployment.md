@@ -82,13 +82,24 @@ export USE_SECRETS_MANAGER=false
 
 ### 1.1 AWS 認証の設定
 
+**方法A: .env ファイル（推奨）**
+
+`infra/.env` ファイルを作成し、必要な値を設定します（`.env.example` を参照）。
+
 ```bash
-# 方法A: 環境変数
+cp infra/.env.example infra/.env
+# infra/.env を編集して認証情報を設定
+```
+
+**方法B: 環境変数（直接エクスポート）**
+```bash
 export AWS_ACCESS_KEY_ID=xxxxx
 export AWS_SECRET_ACCESS_KEY=xxxxx
 export AWS_DEFAULT_REGION=ap-northeast-1
+```
 
-# 方法B: AWS SSO（推奨）
+**方法C: AWS SSO**
+```bash
 aws sso login --profile your-profile
 export AWS_PROFILE=your-profile
 ```
@@ -98,7 +109,7 @@ export AWS_PROFILE=your-profile
 ```bash
 cd infra
 
-# Secrets Manager を使用（推奨）
+# .env ファイルがある場合は自動的に読み込まれます
 npx cdk deploy
 
 # または環境変数を使用（コスト削減）
