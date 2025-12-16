@@ -5,14 +5,33 @@
 
 モダンな Web 開発のベストプラクティスを集約したスターターキットです。Next.js + AWS Amplify + CDK によるモノレポ構成で、最速で Web サイトを立ち上げ、かつスケーラブルな基盤を提供します。
 
+---
+
+## 📋 目次
+
+- [特徴](#-特徴)
+- [プロジェクト構成](#-プロジェクト構成)
+- [クイックスタート](#-クイックスタート)
+- [AWS へのデプロイ](#-aws-へのデプロイ)
+- [必要な環境変数・シークレット](#-必要な環境変数シークレット)
+- [利用可能なコマンド](#-利用可能なコマンド)
+- [ドキュメント](#-ドキュメント)
+
+---
+
 ## ✨ 特徴
 
-- **🚀 Turborepo** - 高速なビルドキャッシュとモノレポ管理
-- **⚡ Next.js 15** - App Router + React 19 + SSR対応
-- **☁️ AWS CDK** - Infrastructure as Code で再現性を担保
-- **🎨 Tailwind CSS** - ユーティリティファーストなスタイリング
-- **🔄 GitHub Actions** - CI/CD パイプライン完備
-- **📦 pnpm** - 高速で効率的なパッケージ管理
+| 技術 | 説明 |
+|------|------|
+| 🚀 **Turborepo** | 高速なビルドキャッシュとモノレポ管理 |
+| ⚡ **Next.js 15** | App Router + React 19 + SSR対応 |
+| ☁️ **AWS CDK** | Infrastructure as Code で再現性を担保 |
+| 🎨 **Tailwind CSS** | ユーティリティファーストなスタイリング |
+| 🔄 **GitHub Actions** | CI/CD パイプライン完備 |
+| 📦 **pnpm** | 高速で効率的なパッケージ管理 |
+| 🐳 **Devcontainer** | 統一された開発環境 |
+
+---
 
 ## 📁 プロジェクト構成
 
@@ -25,40 +44,137 @@ next-amplify-starter-kit/
 │   └── eslint-config/       # 共有 ESLint 設定
 ├── infra/                   # AWS CDK インフラコード
 ├── docs/                    # ドキュメント
+│   ├── 00_project/          # プロジェクト管理
+│   ├── 20_development/      # 開発ガイド
+│   └── 30_operations/       # 運用ガイド
 └── .github/workflows/       # CI/CD 定義
 ```
+
+---
 
 ## 🚀 クイックスタート
 
 ### 前提条件
 
-- Node.js 18.17.0 以上
-- pnpm 8.0.0 以上
-- Docker Desktop または Rancher Desktop（Devcontainer利用時）
+| ツール | 最小バージョン | 推奨 |
+|--------|--------------|------|
+| Node.js | 18.17.0 | 20.x LTS |
+| pnpm | 8.0.0 | 9.x |
+| Docker | - | 最新版（Devcontainer使用時） |
 
-### セットアップ
+### 1. リポジトリのクローン
 
 ```bash
-# リポジトリをクローン
 git clone https://github.com/i-Willink-Inc/next-amplify-starter-kit.git
 cd next-amplify-starter-kit
+```
 
-# 依存関係をインストール
+### 2. 依存関係のインストール
+
+```bash
 pnpm install
+```
 
-# 開発サーバーを起動
+### 3. 開発サーバーの起動
+
+```bash
 pnpm dev
 ```
 
 http://localhost:3000 でアプリケーションにアクセスできます。
 
-### Devcontainer を使用する場合
+### Devcontainer を使用する場合（推奨）
 
 1. Docker Desktop または Rancher Desktop を起動
 2. VS Code でプロジェクトを開く
-3. コマンドパレット → **「Dev Containers: Reopen in Container」**
+3. コマンドパレット (Ctrl+Shift+P) → **「Dev Containers: Reopen in Container」**
 
-詳細は [Devcontainer 利用ガイド](docs/20_development/devcontainer-guide.md) を参照してください。
+> **Note**: Docker context の設定については [Devcontainer 利用ガイド](docs/20_development/devcontainer-guide.md) を参照してください。
+
+---
+
+## ☁️ AWS へのデプロイ
+
+### デプロイフロー
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 1: CDKデプロイ（ローカル or GitHub Actions）               │
+│          → AWS 上に Amplify サービスを作成                       │
+│          → GitHub リポジトリと連携設定                           │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 2: main ブランチにマージ                                   │
+│          → Amplify が変更を自動検知                              │
+│          → amplify.yml に従ってビルド・デプロイ                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### パターン1: ローカルからのデプロイ（初回セットアップ推奨）
+
+```bash
+# 1. AWS 認証の設定
+export AWS_ACCESS_KEY_ID=xxxxx
+export AWS_SECRET_ACCESS_KEY=xxxxx
+export AWS_DEFAULT_REGION=ap-northeast-1
+
+# 2. GitHub PAT を Secrets Manager に保存（初回のみ）
+aws secretsmanager create-secret \
+  --name github/amplify-token \
+  --secret-string "ghp_xxxxxxxxxxxxxxxx"
+
+# 3. CDK デプロイ
+cd infra
+npx cdk deploy
+```
+
+### パターン2: GitHub Actions からの自動デプロイ
+
+1. GitHub Secrets に認証情報を設定（下記参照）
+2. `infra/` 配下のファイルを変更して `main` にマージ
+3. GitHub Actions が自動で CDK デプロイを実行
+
+詳細な手順は [デプロイ手順書](docs/30_operations/deployment.md) を参照してください。
+
+---
+
+## 🔐 必要な環境変数・シークレット
+
+### AWS Secrets Manager（必須）
+
+| シークレット名 | 値 | 説明 |
+|--------------|-----|------|
+| `github/amplify-token` | `ghp_xxxxxxxx` | GitHub Personal Access Token |
+
+**GitHub PAT に必要なスコープ:**
+- `repo` - リポジトリへのフルアクセス
+- `admin:repo_hook` - Webhook 設定用
+
+### ローカル環境変数（パターン1使用時）
+
+| 環境変数 | 値の例 | 説明 |
+|---------|-------|------|
+| `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` | IAM アクセスキー ID |
+| `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` | IAM シークレットアクセスキー |
+| `AWS_DEFAULT_REGION` | `ap-northeast-1` | デフォルトリージョン |
+
+### GitHub Secrets（パターン2使用時）
+
+#### 方式A: OIDC認証（推奨）
+
+| Secret 名 | 値の例 |
+|----------|-------|
+| `AWS_ROLE_ARN` | `arn:aws:iam::123456789012:role/GitHubActionsRole` |
+
+#### 方式B: アクセスキー認証
+
+| Secret 名 | 値の例 |
+|----------|-------|
+| `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` |
+| `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` |
+
+---
 
 ## 📋 利用可能なコマンド
 
@@ -70,35 +186,33 @@ http://localhost:3000 でアプリケーションにアクセスできます。
 | `pnpm format` | Prettier でフォーマット |
 | `pnpm test` | テスト実行 |
 
-## ☁️ AWS へのデプロイ
+### CDK コマンド（infra/）
 
-### 事前準備
+| コマンド | 説明 |
+|---------|------|
+| `npx cdk diff` | 変更内容を確認 |
+| `npx cdk deploy` | スタックをデプロイ |
+| `npx cdk synth` | CloudFormation テンプレート生成 |
 
-1. AWS アカウントの準備
-2. GitHub Personal Access Token を Secrets Manager に保存
-
-```bash
-aws secretsmanager create-secret \
-  --name github/amplify-token \
-  --secret-string "ghp_your_github_pat"
-```
-
-### CDK デプロイ
-
-```bash
-cd infra
-npx cdk deploy
-```
+---
 
 ## 📚 ドキュメント
 
-- [プロジェクト計画書](docs/00_project/PROJECT_PLAN.md)
-- [ドキュメント管理ルール](docs/00_project/DOCUMENT_RULES.md)
-- [Devcontainer 利用ガイド](docs/20_development/devcontainer-guide.md)
+| ドキュメント | 対象者 | 説明 |
+|------------|-------|------|
+| [プロジェクト計画書](docs/00_project/PROJECT_PLAN.md) | 全員 | プロジェクトの概要と計画 |
+| [ドキュメント管理ルール](docs/00_project/DOCUMENT_RULES.md) | 開発者 | ドキュメントの書き方 |
+| [開発環境セットアップ](docs/20_development/getting-started.md) | 開発者 | 開発環境の構築手順 |
+| [Devcontainer 利用ガイド](docs/20_development/devcontainer-guide.md) | 開発者 | Docker開発環境の利用方法 |
+| [デプロイ手順書](docs/30_operations/deployment.md) | 運用者 | AWS へのデプロイ手順 |
+
+---
 
 ## 🤝 コントリビューション
 
 コントリビューションを歓迎します！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+
+---
 
 ## 📄 ライセンス
 
