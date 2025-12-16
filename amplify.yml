@@ -12,7 +12,7 @@ applications:
           commands:
             - pnpm build
       artifacts:
-        baseDirectory: .next/standalone/apps/web
+        baseDirectory: .next/standalone
         files:
           - '**/*'
       cache:
