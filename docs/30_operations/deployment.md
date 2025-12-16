@@ -8,7 +8,24 @@
 このプロジェクトでは、AWS Amplify を使用して Next.js アプリケーションをホスティングします。
 デプロイ方法は **ローカルから手動** と **GitHub Actions から自動** の2パターンに対応しています。
 
-> **Note**: コスト削減のため、AWS Secrets Manager は使用せず、環境変数でGitHubトークンを渡す方式を採用しています。
+---
+
+## GitHub トークンの管理方法
+
+| 方法 | 推奨度 | セキュリティ | コスト |
+|------|-------|-------------|-------|
+| **Secrets Manager（デフォルト）** | ⭐ 推奨 | ◎ 高い | 月額約$0.40 |
+| 環境変数 | 開発用 | ○ 中程度 | 無料 |
+
+### 切り替え方法
+
+```bash
+# デフォルト: Secrets Manager を使用（推奨）
+npx cdk deploy
+
+# コスト削減: 環境変数を使用
+USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
+```
 
 ---
 
@@ -30,9 +47,9 @@
 
 ---
 
-## 事前準備（共通）
+## 事前準備
 
-### GitHub Personal Access Token (PAT) の作成
+### 1. GitHub Personal Access Token (PAT) の作成
 
 1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
 2. 「Generate new token」をクリック
@@ -41,49 +58,52 @@
    - `admin:repo_hook` (Full control of repository hooks)
 4. トークンをコピーして安全に保存
 
+### 2. GitHub トークンの保存（方法を選択）
+
+#### 方法A: Secrets Manager（推奨）
+
+```bash
+aws secretsmanager create-secret \
+  --name github/amplify-token \
+  --secret-string "ghp_xxxxxxxxxxxxxxxx" \
+  --region ap-northeast-1
+```
+
+#### 方法B: 環境変数（コスト削減）
+
+```bash
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
+export USE_SECRETS_MANAGER=false
+```
+
 ---
 
-## パターン1: ローカルからのデプロイ（推奨: 初回セットアップ時）
+## パターン1: ローカルからのデプロイ
 
 ### 1.1 AWS 認証の設定
 
-**方法A: 環境変数**
 ```bash
+# 方法A: 環境変数
 export AWS_ACCESS_KEY_ID=xxxxx
 export AWS_SECRET_ACCESS_KEY=xxxxx
 export AWS_DEFAULT_REGION=ap-northeast-1
-```
 
-**方法B: AWS SSO（推奨）**
-```bash
+# 方法B: AWS SSO（推奨）
 aws sso login --profile your-profile
 export AWS_PROFILE=your-profile
 ```
 
-### 1.2 GitHub トークンの設定
-
-```bash
-export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
-```
-
-### 1.3 CDK デプロイ
+### 1.2 CDK デプロイ
 
 ```bash
 cd infra
 
-# 変更内容を確認
-npx cdk diff
-
-# デプロイ実行
+# Secrets Manager を使用（推奨）
 npx cdk deploy
+
+# または環境変数を使用（コスト削減）
+USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
 ```
-
-### 1.4 出力の確認
-
-デプロイ完了後、以下の出力が表示されます:
-- `AmplifyAppId`: Amplify アプリ ID
-- `AmplifyDefaultDomain`: デフォルトドメイン
-- `ProductionUrl`: 本番 URL
 
 ---
 
@@ -91,63 +111,42 @@ npx cdk deploy
 
 ### 2.1 GitHub Secrets の設定
 
-GitHub リポジトリ → Settings → Secrets and variables → Actions → Secrets
-
-| Secret 名 | 値 | 説明 |
+| Secret 名 | 値 | 用途 |
 |----------|-----|------|
-| `GH_PAT` | `ghp_xxxxxxxx` | GitHub Personal Access Token（必須） |
+| `GH_PAT` | `ghp_xxxxxxxx` | GitHub PAT（USE_SECRETS_MANAGER=false 時のみ必要） |
+| `AWS_ROLE_ARN` | `arn:aws:iam::xxx:role/xxx` | OIDC認証用 |
 
-#### AWS認証（以下のいずれか）
-
-**方式A: OIDC認証（推奨）**
-
-| Secret 名 | 値 |
-|----------|-----|
-| `AWS_ROLE_ARN` | `arn:aws:iam::123456789012:role/GitHubActionsRole` |
-
-**方式B: アクセスキー認証**
+または:
 
 | Secret 名 | 値 |
 |----------|-----|
-| `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` |
-| `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` |
+| `AWS_ACCESS_KEY_ID` | アクセスキーID |
+| `AWS_SECRET_ACCESS_KEY` | シークレットキー |
 
 ### 2.2 ワークフローのトリガー
 
 - **自動**: `infra/` または `amplify.yml` の変更が `main` にマージされた時
 - **手動**: Actions → Deploy Infrastructure → Run workflow
+  - `use_secrets_manager`: `true`（推奨）または `false`（コスト削減）
 
 ---
 
-## 必要な環境変数・シークレット一覧
+## 必要な設定一覧
 
-### ローカル（パターン1）
+### Secrets Manager 使用時（推奨）
 
-| 環境変数 | 値の例 | 説明 |
-|---------|-------|------|
-| `GITHUB_TOKEN` | `ghp_xxxxxxxx` | GitHub PAT（必須） |
-| `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` | IAM アクセスキー |
-| `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` | IAM シークレットキー |
-| `AWS_DEFAULT_REGION` | `ap-northeast-1` | リージョン |
+| 設定場所 | 名前 | 説明 |
+|---------|------|------|
+| AWS Secrets Manager | `github/amplify-token` | GitHub PAT |
+| GitHub Secrets | `AWS_ROLE_ARN` または `AWS_ACCESS_KEY_ID` | AWS認証 |
 
-### GitHub Secrets（パターン2）
+### 環境変数使用時（コスト削減）
 
-| Secret 名 | 説明 |
-|----------|------|
-| `GH_PAT` | GitHub PAT（必須） |
-| `AWS_ROLE_ARN` | OIDC用IAMロールARN |
-| `AWS_ACCESS_KEY_ID` | アクセスキーID（OIDCを使わない場合） |
-| `AWS_SECRET_ACCESS_KEY` | シークレットキー（OIDCを使わない場合） |
-
----
-
-## Amplify 自動ビルド
-
-CDK デプロイ後、Amplify Console が GitHub 連携により以下を自動実行:
-
-1. `main` ブランチの変更を検知
-2. `amplify.yml` に従ってビルド（Amplify側で自動読み込み）
-3. Next.js SSR アプリをデプロイ
+| 設定場所 | 名前 | 説明 |
+|---------|------|------|
+| GitHub Secrets | `GH_PAT` | GitHub PAT |
+| GitHub Secrets | `AWS_ROLE_ARN` または `AWS_ACCESS_KEY_ID` | AWS認証 |
+| ローカル/CI | `USE_SECRETS_MANAGER=false` | 切り替えフラグ |
 
 ---
 
@@ -155,6 +154,6 @@ CDK デプロイ後、Amplify Console が GitHub 連携により以下を自動�
 
 | エラー | 原因 | 解決方法 |
 |-------|------|---------|
-| `GitHub token is required` | GITHUB_TOKEN が設定されていない | 環境変数を設定 |
-| `Access Denied` | IAM 権限不足 | AdministratorAccess を付与 |
-| `pnpm not found` | Amplifyビルドでcorepack未有効 | amplify.yml を確認 |
+| `Secrets Manager secret not found` | シークレット未作成 | `aws secretsmanager create-secret` を実行 |
+| `GitHub token is required` | `USE_SECRETS_MANAGER=false` なのに `GITHUB_TOKEN` 未設定 | 環境変数を設定 |
+| `Access Denied` | IAM 権限不足 | 必要な権限を付与 |

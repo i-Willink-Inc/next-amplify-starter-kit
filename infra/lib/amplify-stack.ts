@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as amplify from 'aws-cdk-lib/aws-amplify';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Construct } from 'constructs';
@@ -18,10 +19,16 @@ export interface AmplifyStackProps extends cdk.StackProps {
     readonly repositoryName?: string;
 
     /**
-     * GitHub Personal Access Token
+     * GitHub Personal Access Token (used when USE_SECRETS_MANAGER=false)
      * @default - Retrieved from environment variable GITHUB_TOKEN
      */
     readonly githubToken?: string;
+
+    /**
+     * Secrets Manager secret name for GitHub token
+     * @default 'github/amplify-token'
+     */
+    readonly githubTokenSecretName?: string;
 }
 
 export class AmplifyStack extends cdk.Stack {
@@ -41,17 +48,11 @@ export class AmplifyStack extends cdk.Stack {
             this.node.tryGetContext('repositoryName') ||
             'next-amplify-starter-kit';
 
-        // Get GitHub token from props, context, or environment variable
-        const githubToken =
-            props?.githubToken ||
-            this.node.tryGetContext('githubToken') ||
-            process.env.GITHUB_TOKEN;
-
-        if (!githubToken) {
-            throw new Error(
-                'GitHub token is required. Set GITHUB_TOKEN environment variable or pass via context/props.'
-            );
-        }
+        // Determine GitHub token source
+        // Default: Use Secrets Manager (recommended)
+        // If USE_SECRETS_MANAGER=false: Use environment variable (cost reduction option)
+        const useSecretsManager = process.env.USE_SECRETS_MANAGER !== 'false';
+        const githubToken = this.resolveGitHubToken(props, useSecretsManager);
 
         // Read buildSpec from amplify.yml file (single source of truth)
         const buildSpec = fs.readFileSync(
@@ -109,5 +110,45 @@ export class AmplifyStack extends cdk.Stack {
             value: `https://main.${this.amplifyApp.attrDefaultDomain}`,
             description: 'Production URL',
         });
+
+        new cdk.CfnOutput(this, 'TokenSource', {
+            value: useSecretsManager ? 'Secrets Manager' : 'Environment Variable',
+            description: 'GitHub Token Source',
+        });
+    }
+
+    /**
+     * Resolve GitHub token based on configuration
+     * - Default (USE_SECRETS_MANAGER not set or true): Use Secrets Manager
+     * - USE_SECRETS_MANAGER=false: Use environment variable
+     */
+    private resolveGitHubToken(
+        props: AmplifyStackProps | undefined,
+        useSecretsManager: boolean
+    ): string {
+        if (useSecretsManager) {
+            // Recommended: Use Secrets Manager
+            const secretName = props?.githubTokenSecretName || 'github/amplify-token';
+            const secret = secretsmanager.Secret.fromSecretNameV2(
+                this,
+                'GitHubToken',
+                secretName
+            );
+            return secret.secretValue.unsafeUnwrap();
+        } else {
+            // Cost reduction option: Use environment variable
+            const token =
+                props?.githubToken ||
+                this.node.tryGetContext('githubToken') ||
+                process.env.GITHUB_TOKEN;
+
+            if (!token) {
+                throw new Error(
+                    'GitHub token is required when USE_SECRETS_MANAGER=false. ' +
+                    'Set GITHUB_TOKEN environment variable or pass via context/props.'
+                );
+            }
+            return token;
+        }
     }
 }
