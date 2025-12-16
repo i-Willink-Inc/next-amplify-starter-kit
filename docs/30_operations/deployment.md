@@ -142,6 +142,31 @@ USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
 
 ---
 
+## 独自ドメインの設定（オプション）
+
+Route53 に登録されているドメインを Amplify アプリに適用できます。
+設定すると、ルートドメイン (`example.com`) と `www` サブドメイン (`www.example.com`) が自動的に設定されます。
+
+> **前提**: 同一 AWS アカウントの Route53 に Hosted Zone が作成されていること。
+
+### 設定方法
+
+**ローカルデプロイ (.env)**
+```bash
+# infra/.env
+DOMAIN_NAME=example.com
+```
+
+**ローカルデプロイ (Context)**
+```bash
+npx cdk deploy -c domainName=example.com
+```
+
+**GitHub Actions**
+現在、環境変数 `DOMAIN_NAME` を渡す設定を追加する必要があります（必要に応じて workflow を修正してください）。
+
+---
+
 ## 前提となる権限設定
 
 デプロイには以下の権限が必要です。

@@ -28,7 +28,14 @@ export interface AmplifyStackProps extends cdk.StackProps {
      * Secrets Manager secret name for GitHub token
      * @default 'github/amplify-token'
      */
+
     readonly githubTokenSecretName?: string;
+
+    /**
+     * Custom domain name (optional)
+     * @default - Retrieved from context or environment variable DOMAIN_NAME
+     */
+    readonly domainName?: string;
 }
 
 export class AmplifyStack extends cdk.Stack {
@@ -110,6 +117,34 @@ export class AmplifyStack extends cdk.Stack {
             value: `https://main.${this.amplifyApp.attrDefaultDomain}`,
             description: 'Production URL',
         });
+
+        // Domain management
+        const domainName =
+            props?.domainName ||
+            this.node.tryGetContext('domainName') ||
+            process.env.DOMAIN_NAME;
+
+        if (domainName) {
+            new amplify.CfnDomain(this, 'AmplifyDomain', {
+                appId: this.amplifyApp.attrAppId,
+                domainName: domainName,
+                subDomainSettings: [
+                    {
+                        branchName: this.mainBranch.branchName,
+                        prefix: '',
+                    },
+                    {
+                        branchName: this.mainBranch.branchName,
+                        prefix: 'www',
+                    },
+                ],
+            });
+
+            new cdk.CfnOutput(this, 'CustomDomainUrl', {
+                value: `https://${domainName}`,
+                description: 'Custom Domain URL',
+            });
+        }
 
         new cdk.CfnOutput(this, 'TokenSource', {
             value: useSecretsManager ? 'Secrets Manager' : 'Environment Variable',
