@@ -35,7 +35,17 @@ export interface AmplifyStackProps extends cdk.StackProps {
      * Custom domain name (optional)
      * @default - Retrieved from context or environment variable DOMAIN_NAME
      */
+    /**
+     * Custom domain name (optional)
+     * @default - Retrieved from context or environment variable DOMAIN_NAME
+     */
     readonly domainName?: string;
+
+    /**
+     * Amplify App Name
+     * @default - Retrieved from environment variable AMPLIFY_APP_NAME or defaults to 'next-amplify-starter-kit'
+     */
+    readonly amplifyAppName?: string;
 }
 
 export class AmplifyStack extends cdk.Stack {
@@ -55,6 +65,11 @@ export class AmplifyStack extends cdk.Stack {
             this.node.tryGetContext('repositoryName') ||
             'next-amplify-starter-kit';
 
+        const appName = 
+            props?.amplifyAppName ||
+            process.env.AMPLIFY_APP_NAME ||
+            'next-amplify-starter-kit';
+
         // Determine GitHub token source
         // Default: Use Secrets Manager (recommended)
         // If USE_SECRETS_MANAGER=false: Use environment variable (cost reduction option)
@@ -69,7 +84,7 @@ export class AmplifyStack extends cdk.Stack {
 
         // Amplify App
         this.amplifyApp = new amplify.CfnApp(this, 'AmplifyApp', {
-            name: 'next-amplify-starter-kit',
+            name: appName,
             repository: `https://github.com/${repoOwner}/${repoName}`,
             accessToken: githubToken,
             platform: 'WEB_COMPUTE', // Required for Next.js SSR
@@ -139,6 +154,10 @@ export class AmplifyStack extends cdk.Stack {
                     },
                 ],
             });
+
+            // Ensure domain is created after branch
+            const domain = this.node.findChild('AmplifyDomain') as amplify.CfnDomain;
+            domain.addDependency(this.mainBranch);
 
             new cdk.CfnOutput(this, 'CustomDomainUrl', {
                 value: `https://${domainName}`,
