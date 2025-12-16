@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as amplify from 'aws-cdk-lib/aws-amplify';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Construct } from 'constructs';
 
 export interface AmplifyStackProps extends cdk.StackProps {
@@ -15,6 +16,12 @@ export interface AmplifyStackProps extends cdk.StackProps {
      * @default - Retrieved from context or environment
      */
     readonly repositoryName?: string;
+
+    /**
+     * GitHub Personal Access Token
+     * @default - Retrieved from environment variable GITHUB_TOKEN
+     */
+    readonly githubToken?: string;
 }
 
 export class AmplifyStack extends cdk.Stack {
@@ -34,20 +41,31 @@ export class AmplifyStack extends cdk.Stack {
             this.node.tryGetContext('repositoryName') ||
             'next-amplify-starter-kit';
 
-        // Reference to GitHub token stored in Secrets Manager
-        const githubTokenSecret = secretsmanager.Secret.fromSecretNameV2(
-            this,
-            'GitHubToken',
-            'github/amplify-token'
+        // Get GitHub token from props, context, or environment variable
+        const githubToken =
+            props?.githubToken ||
+            this.node.tryGetContext('githubToken') ||
+            process.env.GITHUB_TOKEN;
+
+        if (!githubToken) {
+            throw new Error(
+                'GitHub token is required. Set GITHUB_TOKEN environment variable or pass via context/props.'
+            );
+        }
+
+        // Read buildSpec from amplify.yml file (single source of truth)
+        const buildSpec = fs.readFileSync(
+            path.join(__dirname, '../../amplify.yml'),
+            'utf8'
         );
 
         // Amplify App
         this.amplifyApp = new amplify.CfnApp(this, 'AmplifyApp', {
             name: 'next-amplify-starter-kit',
             repository: `https://github.com/${repoOwner}/${repoName}`,
-            accessToken: githubTokenSecret.secretValue.unsafeUnwrap(),
+            accessToken: githubToken,
             platform: 'WEB_COMPUTE', // Required for Next.js SSR
-            buildSpec: this.getBuildSpec(),
+            buildSpec: buildSpec,
             customRules: [
                 {
                     source: '/<*>',
@@ -91,30 +109,5 @@ export class AmplifyStack extends cdk.Stack {
             value: `https://main.${this.amplifyApp.attrDefaultDomain}`,
             description: 'Production URL',
         });
-    }
-
-    private getBuildSpec(): string {
-        return `version: 1
-applications:
-  - appRoot: apps/web
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - corepack enable
-            - corepack prepare pnpm@latest --activate
-            - pnpm install --frozen-lockfile
-        build:
-          commands:
-            - pnpm build
-      artifacts:
-        baseDirectory: .next
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - node_modules/**/*
-          - .next/cache/**/*
-`;
     }
 }
