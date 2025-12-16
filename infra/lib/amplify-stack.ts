@@ -59,10 +59,12 @@ export class AmplifyStack extends cdk.Stack {
         const repoOwner =
             props?.repositoryOwner ||
             this.node.tryGetContext('repositoryOwner') ||
+            process.env.REPO_OWNER ||
             'i-Willink-Inc';
         const repoName =
             props?.repositoryName ||
             this.node.tryGetContext('repositoryName') ||
+            process.env.REPO_NAME ||
             'next-amplify-starter-kit';
 
         const appName = 
