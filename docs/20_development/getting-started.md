@@ -64,6 +64,15 @@ Docker を使用して統一された開発環境を利用できます。
 
 詳細は [devcontainer-guide.md](./devcontainer-guide.md) を参照してください。
 
+## インフラストラクチャ (AWS CDK)
+
+このプロジェクトは AWS CDK を使用してインフラを管理しています。
+`infra/` ディレクトリに CDK のコードが含まれています。
+
+AWS へのデプロイやインフラ構成については、以下を参照してください：
+- [デプロイ手順書](../30_operations/deployment.md)
+- [README.md - AWS へのデプロイ](../../README.md#aws-へのデプロイ)
+
 ## 次のステップ
 
 - [ドキュメント管理ルール](../00_project/DOCUMENT_RULES.md)

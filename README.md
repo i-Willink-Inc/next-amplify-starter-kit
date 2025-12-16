@@ -113,18 +113,14 @@ http://localhost:3000 でアプリケーションにアクセスできます。
 
 ### パターン1: ローカルからのデプロイ（初回セットアップ推奨）
 
+`.env` ファイルを使用して簡単にデプロイできます。
+
 ```bash
-# 1. AWS 認証の設定
-export AWS_ACCESS_KEY_ID=xxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxx
-export AWS_DEFAULT_REGION=ap-northeast-1
+# 1. 環境変数の設定
+cp infra/.env.example infra/.env
+# infra/.env を編集して AWS認証情報 と GITHUB_TOKEN を設定
 
-# 2. GitHub PAT を Secrets Manager に保存（初回のみ）
-aws secretsmanager create-secret \
-  --name github/amplify-token \
-  --secret-string "ghp_xxxxxxxxxxxxxxxx"
-
-# 3. CDK デプロイ
+# 2. CDK デプロイ
 cd infra
 npx cdk deploy
 ```
