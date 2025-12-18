@@ -11,13 +11,8 @@ applications:
         build:
           commands:
             - pnpm build
-            # Copy static files to standalone output (required for Next.js standalone)
-            - cp -r .next/static .next/standalone/apps/web/.next/static
-            - cp -r public .next/standalone/apps/web/public 2>/dev/null || true
-            # Move required-server-files.json to where Amplify expects it
-            - cp .next/standalone/apps/web/.next/required-server-files.json .next/standalone/apps/web/required-server-files.json 2>/dev/null || true
       artifacts:
-        baseDirectory: .next/standalone/apps/web
+        baseDirectory: .next
         files:
           - '**/*'
       cache:
