@@ -1,22 +1,26 @@
 version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - corepack enable
-        - corepack prepare pnpm@latest --activate
-        - pnpm install --frozen-lockfile
-    build:
-      commands:
-        - cd apps/web && pnpm build
-        # Copy static files to standalone output (required for Next.js standalone)
-        - cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
-        - cp -r apps/web/public apps/web/.next/standalone/apps/web/public 2>/dev/null || true
-  artifacts:
-    baseDirectory: apps/web/.next/standalone/apps/web
-    files:
-      - '**/*'
-  cache:
-    paths:
-      - apps/web/node_modules/**/*
-      - apps/web/.next/cache/**/*
+applications:
+  - appRoot: apps/web
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - corepack prepare pnpm@latest --activate
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm build
+            # Copy static files to standalone output (required for Next.js standalone)
+            - cp -r .next/static .next/standalone/apps/web/.next/static
+            - cp -r public .next/standalone/apps/web/public 2>/dev/null || true
+            # Move required-server-files.json to where Amplify expects it
+            - cp .next/standalone/apps/web/.next/required-server-files.json .next/standalone/apps/web/required-server-files.json 2>/dev/null || true
+      artifacts:
+        baseDirectory: .next/standalone/apps/web
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
