@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent, ChangeEvent } from 'react';
+import Link from 'next/link';
 
 /**
  * Form data structure
@@ -215,12 +216,12 @@ export default function ContactPage() {
 
                 {/* Back Link */}
                 <div className="text-center mt-8">
-                    <a
+                    <Link
                         href="/"
                         className="text-gray-400 hover:text-white transition-colors"
                     >
                         ← Back to Home
-                    </a>
+                    </Link>
                 </div>
             </div>
         </main>
