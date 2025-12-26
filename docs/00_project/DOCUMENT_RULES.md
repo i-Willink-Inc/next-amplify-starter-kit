@@ -48,9 +48,9 @@ my-monorepo/
 - **Japanese filenames are prohibited**: To prevent character encoding issues
 - **Do not include version numbers**: Manage history with Git
 
-### 2.2 Required Metadata
+### 2.2 Recommended Metadata
 
-Include the following at the beginning of each document:
+Include the following at the beginning of each document (Optional: `Author` can be omitted as it's tracked by Git):
 
 ```markdown
 # Document Title
@@ -101,42 +101,10 @@ docs(fix): Fix typo
 
 ---
 
-## 4. Documentation Plan by Phase
 
-### Phase 1: Monorepo Foundation Setup
+## 4. Templates
 
-- [ ] `README.md` - Project Overview
-- [ ] `docs/20_development/getting-started.md` - Development Environment Setup
-
-### Phase 1.5: Devcontainer Foundation Configuration
-
-- [ ] `docs/20_development/devcontainer-guide.md` - Devcontainer Usage Guide
-
-### Phase 2: Next.js Application Implementation
-
-- [ ] `docs/20_development/coding-standards.md` - Coding Standards
-- [ ] `docs/10_design/architecture.md` - Architecture Design
-
-### Phase 3: Amplify Environment Construction via IaC
-
-- [ ] `docs/10_design/infrastructure.md` - Infrastructure Design
-- [ ] `docs/30_operations/deployment.md` - Deployment Procedures
-
-### Phase 4: CI/CD Pipeline Construction
-
-- [ ] `docs/30_operations/ci-cd.md` - CI/CD Pipeline Description
-
-### Phase 5: Documentation and Release
-
-- [ ] Final review of all documents
-- [ ] `CONTRIBUTING.md` - Contributing Guide
-- [ ] `LICENSE` - License File
-
----
-
-## 5. Templates
-
-### 5.1 New Document Template
+### 4.1 New Document Template
 
 ```markdown
 # [Document Title]
@@ -173,9 +141,9 @@ docs(fix): Fix typo
 
 ---
 
-## 6. Tool Integration
+## 5. Tool Integration
 
-### 6.1 Recommended Tools
+### 5.1 Recommended Tools
 
 | Usage                  | Tool                             |
 | :--------------------- | :------------------------------- |
@@ -183,7 +151,7 @@ docs(fix): Fix typo
 | Diagramming            | Mermaid (Embedded in Markdown)   |
 | Spell Check            | Code Spell Checker (VS Code Ext) |
 
-### 6.2 Using Mermaid Diagrams
+### 5.2 Using Mermaid Diagrams
 
 Describe architecture and flow diagrams using Mermaid:
 

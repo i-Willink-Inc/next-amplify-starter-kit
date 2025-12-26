@@ -68,7 +68,7 @@ USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
 aws secretsmanager create-secret \
   --name github/amplify-token \
   --secret-string "ghp_xxxxxxxxxxxxxxxx" \
-  --region ap-northeast-1
+  --region ap-northeast-1 # Example region
 ```
 
 #### Method B: Environment Variable (Cost Reduction)
@@ -97,7 +97,7 @@ cp infra/.env.example infra/.env
 ```bash
 export AWS_ACCESS_KEY_ID=xxxxx
 export AWS_SECRET_ACCESS_KEY=xxxxx
-export AWS_DEFAULT_REGION=ap-northeast-1
+export AWS_DEFAULT_REGION=ap-northeast-1 # Example region
 ```
 
 **Method C: AWS SSO**
