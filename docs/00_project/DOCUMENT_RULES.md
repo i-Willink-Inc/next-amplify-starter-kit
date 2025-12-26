@@ -10,7 +10,6 @@
 my-monorepo/
 ├── docs/                        # Documentation Root
 00_project/              # Project Management
-│   │   ├── PROJECT_PLAN.md      # Project Plan
 │   │   └── CHANGELOG.md         # Changelog
 │   ├── 10_design/               # Design Documents
 │   │   ├── architecture.md      # Architecture Design

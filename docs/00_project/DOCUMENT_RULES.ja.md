@@ -10,7 +10,6 @@
 my-monorepo/
 ├── docs/                        # ドキュメントルート
 │   ├── 00_project/              # プロジェクト管理
-│   │   ├── PROJECT_PLAN.md      # プロジェクト計画書
 │   │   └── CHANGELOG.md         # 変更履歴
 │   ├── 10_design/               # 設計ドキュメント
 │   │   ├── architecture.md      # アーキテクチャ設計

@@ -78,4 +78,3 @@ AWS へのデプロイやインフラ構成については、以下を参照し�
 ## 次のステップ
 
 - [ドキュメント管理ルール](../00_project/DOCUMENT_RULES.md)
-- [プロジェクト計画書](../00_project/PROJECT_PLAN.md)

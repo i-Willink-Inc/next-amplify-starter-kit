@@ -198,7 +198,6 @@ For detailed instructions, refer to the [Deployment Guide](docs/30_operations/de
 
 | Document | Target | Description |
 |----------|--------|-------------|
-| [Project Plan](docs/00_project/PROJECT_PLAN.md) | All | Project overview and plan |
 | [Documentation Rules](docs/00_project/DOCUMENT_RULES.md) | Developers | How to write documentation |
 | [Getting Started](docs/20_development/getting-started.md) | Developers | Setting up development environment |
 | [Devcontainer Guide](docs/20_development/devcontainer-guide.md) | Developers | How to use Docker dev environment |

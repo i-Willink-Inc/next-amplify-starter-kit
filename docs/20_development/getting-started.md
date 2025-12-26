@@ -78,4 +78,3 @@ For AWS deployment and infrastructure configuration, refer to:
 ## Next Steps
 
 - [Documentation Rules](../00_project/DOCUMENT_RULES.md)
-- [Project Plan](../00_project/PROJECT_PLAN.md)
