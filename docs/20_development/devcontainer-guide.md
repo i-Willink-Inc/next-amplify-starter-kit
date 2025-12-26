@@ -1,88 +1,90 @@
-# Devcontainer 利用ガイド
+# Devcontainer Usage Guide
 
-> **最終更新**: 2025-12-16  
-> **ステータス**: Approved
+[日本語 (Japanese)](devcontainer-guide.ja.md)
 
-## 概要
+> **Last Updated**: 2025-12-16
+> **Status**: Approved
 
-本プロジェクトは VS Code Dev Containers を使用して、統一された開発環境を提供します。
-Docker Desktop または Rancher Desktop のいずれかを使用できます。
+## Overview
+
+This project uses VS Code Dev Containers to provide a unified development environment.
+You can use either Docker Desktop or Rancher Desktop.
 
 ---
 
-## Docker Desktop を使用する場合
+## Using Docker Desktop
 
-### 事前準備
+### Preparation
 
-1. [Docker Desktop](https://www.docker.com/products/docker-desktop/) をインストール
-2. Docker Desktop を起動し、システムトレイにクジラアイコンが表示されるまで待つ
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Start Docker Desktop and wait until the whale icon appears in the system tray
 
-### Docker context の設定
+### Docker Context Setup
 
 ```bash
 docker context use desktop-linux
 docker ps
 ```
 
-### Devcontainer の起動
+### Start Devcontainer
 
-1. VS Code でプロジェクトを開く
-2. Ctrl+Shift+P → **「Dev Containers: Reopen in Container」**
+1. Open project in VS Code
+2. Ctrl+Shift+P → **"Dev Containers: Reopen in Container"**
 
 ---
 
-## Rancher Desktop を使用する場合
+## Using Rancher Desktop
 
-### 事前準備
+### Preparation
 
-1. [Rancher Desktop](https://rancherdesktop.io/) をインストール
-2. Rancher Desktop を起動
-3. **Preferences** → **Container Engine** → **`dockerd (moby)`** を選択
+1. Install [Rancher Desktop](https://rancherdesktop.io/)
+2. Start Rancher Desktop
+3. **Preferences** → **Container Engine** → Select **`dockerd (moby)`**
 
-### Docker context の設定
+### Docker Context Setup
 
 ```bash
 docker context use default
 docker ps
 ```
 
-### Devcontainer の起動
+### Start Devcontainer
 
-1. VS Code でプロジェクトを開く
-2. Ctrl+Shift+P → **「Dev Containers: Reopen in Container」**
+1. Open project in VS Code
+2. Ctrl+Shift+P → **"Dev Containers: Reopen in Container"**
 
 ---
 
-## Docker Desktop と Rancher Desktop の切り替え
+## Switching Between Docker Desktop and Rancher Desktop
 
 ```bash
-# 利用可能な context を確認
+# Check available contexts
 docker context ls
 
-# Docker Desktop を使う場合
+# Use Docker Desktop
 docker context use desktop-linux
 
-# Rancher Desktop を使う場合
+# Use Rancher Desktop
 docker context use default
 ```
 
 > [!IMPORTANT]
-> 切り替え前に、使用しない方のアプリケーションは終了しておくことを推奨します。
+> It is recommended to quit the unused application before switching.
 
 ---
 
-## トラブルシューティング
+## Troubleshooting
 
 ### `failed to connect to the docker API`
 
-- Docker Desktop / Rancher Desktop が起動しているか確認
-- 正しい Docker context に切り替え
+- Check if Docker Desktop / Rancher Desktop is running
+- Switch to the correct Docker context
 
 ### `context "rancher-desktop" not found`
 
-- `docker context use default` を使用
+- Use `docker context use default`
 
-### コンテナ内で pnpm install が失敗
+### pnpm install fails inside container
 
-- ネットワーク接続を確認
-- **「Dev Containers: Rebuild Container」** で再ビルド
+- Check network connection
+- Rebuild using **"Dev Containers: Rebuild Container"**

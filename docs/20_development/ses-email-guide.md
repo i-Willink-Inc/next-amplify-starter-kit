@@ -1,33 +1,35 @@
-# AWS SES メール機能ガイド
+# AWS SES Email Function Guide
 
-このドキュメントでは、Next.js Amplify Starter Kit に組み込まれた AWS SES（Simple Email Service）を使ったメール送信機能について説明します。
+[日本語 (Japanese)](ses-email-guide.ja.md)
 
----
-
-## 📋 目次
-
-- [概要](#-概要)
-- [セットアップ](#-セットアップ)
-- [使用方法](#-使用方法)
-- [API リファレンス](#-api-リファレンス)
-- [SES サンドボックスモード](#-ses-サンドボックスモード)
-- [料金](#-料金)
-- [トラブルシューティング](#-トラブルシューティング)
+This document explains the email sending function using AWS SES (Simple Email Service) integrated into the Next.js Amplify Starter Kit.
 
 ---
 
-## 📋 概要
+## 📋 Table of Contents
 
-### 機能
+- [Overview](#-overview)
+- [Setup](#-setup)
+- [Usage](#-usage)
+- [API Reference](#-api-reference)
+- [SES Sandbox Mode](#-ses-sandbox-mode)
+- [Pricing](#-pricing)
+- [Troubleshooting](#-troubleshooting)
 
-- **Next.js API Routes** を使ったサーバーサイドでのメール送信
-- **Zod** によるリクエストバリデーション
-- **AWS SDK v3** による効率的な SES 連携
-- 柔軟な送信先設定（環境変数、フォーム入力、API パラメータ）
-- HTML メール対応
-- CDK による自動インフラ構築
+---
 
-### アーキテクチャ
+## 📋 Overview
+
+### Features
+
+- Server-side email sending using **Next.js API Routes**
+- Request validation with **Zod**
+- Efficient SES integration with **AWS SDK v3**
+- Flexible sender/recipient settings (Environment variables, Form input, API params)
+- HTML email support
+- Automated infrastructure construction with CDK
+
+### Architecture
 
 ```
 ┌──────────────┐      ┌──────────────────┐      ┌─────────────┐
@@ -39,33 +41,33 @@
 
 ---
 
-## 🔧 セットアップ
+## 🔧 Setup
 
-### 前提条件
+### Prerequisites
 
-SES メール機能を使用するには、以下の前提条件が必要です。
+To use the SES email function, the following prerequisites are required.
 
-| 項目 | 必須 | 説明 |
-|-----|------|------|
-| AWS アカウント | ✅ | SES を利用するため |
-| AWS CLI 設定済み | ✅ | `aws configure` で認証情報を設定 |
-| Route53 ホストゾーン | 推奨 | ドメイン検証に使用（自動 DKIM 設定） |
-| 独自ドメイン | 推奨 | 本番運用ではドメイン検証を推奨 |
+| Item | Required | Description |
+|------|----------|-------------|
+| AWS Account | ✅ | To use SES |
+| AWS CLI Configured | ✅ | Set credentials with `aws configure` |
+| Route53 Hosted Zone | Recommended | Used for domain verification (Auto DKIM setup) |
+| Custom Domain | Recommended | Domain verification is recommended for production |
 
 > [!IMPORTANT]
-> **ドメイン検証 vs メールアドレス検証**
+> **Domain Verification vs Email Address Verification**
 > 
-> - **メールアドレス検証**: 特定のメールアドレスのみ送信元として使用可能
-> - **ドメイン検証**: ドメイン配下の全てのメールアドレスが送信元として使用可能（推奨）
+> - **Email Address Verification**: Only specific email addresses can be used as sender
+> - **Domain Verification**: All email addresses under the domain can be used as sender (Recommended)
 
-### 1. 環境変数の設定
+### 1. Environment Variable Configuration
 
-#### ローカル開発環境
+#### Local Development Environment
 
-`apps/web/.env.local` ファイルを作成し、以下の環境変数を設定します：
+Create `apps/web/.env.local` file and set the following environment variables:
 
 ```bash
-# AWS Credentials (AWS CLI で設定済みの場合は不要)
+# AWS Credentials (Not needed if configured via AWS CLI)
 # AWS_ACCESS_KEY_ID=your-access-key-id
 # AWS_SECRET_ACCESS_KEY=your-secret-access-key
 AWS_REGION=ap-northeast-1
@@ -75,61 +77,61 @@ SES_FROM_EMAIL=noreply@yourdomain.com
 SES_TO_EMAIL=contact@yourdomain.com
 ```
 
-#### 本番環境（Amplify）
+#### Production Environment (Amplify)
 
-Amplify コンソールで環境変数を設定します：
+Set environment variables in the Amplify Console:
 
-1. Amplify コンソール → アプリ → 環境変数
-2. 以下の変数を追加：
+1. Amplify Console → App → Environment variables
+2. Add the following variables:
    - `SES_FROM_EMAIL`
    - `SES_TO_EMAIL`
-   - `SES_REGION` (オプション)
+   - `SES_REGION` (Optional)
 
-> **Note**: AWS 認証情報は Amplify の実行ロールから自動的に取得されるため、`AWS_ACCESS_KEY_ID` などは不要です。
+> **Note**: AWS credentials are automatically retrieved from Amplify's execution role, so `AWS_ACCESS_KEY_ID` etc. are not required.
 
-### 2. SES ドメイン検証（推奨）
+### 2. SES Domain Verification (Recommended)
 
-ドメイン検証を行うと、そのドメイン配下の全てのメールアドレスから送信できるようになります。
+Domain verification allows sending from all email addresses under that domain.
 
-#### 方法A: CDK で自動設定（Route53 使用時・推奨）
+#### Method A: Auto Setup via CDK (Recommended for Route53)
 
-Route53 でドメインを管理している場合、CDK で DKIM レコードを自動作成できます。
+If managing domain with Route53, CDK can automatically create DKIM records.
 
-1. **Hosted Zone ID を確認**
+1. **Check Hosted Zone ID**
    ```bash
    aws route53 list-hosted-zones --query "HostedZones[*].[Id,Name]" --output table
    ```
 
-2. **`infra/.env` に設定を追加**
+2. **Add settings to `infra/.env`**
    ```bash
    SES_DOMAIN=yourdomain.com
    ROUTE53_HOSTED_ZONE_ID=Z0123456789ABCDEFGHIJ
    ```
 
-3. **CDK デプロイを実行**
+3. **Execute CDK Deploy**
    ```bash
    cd infra
    npx cdk deploy SesStack
    ```
 
-   DKIM CNAME レコードが自動的に Route53 に追加され、数分で検証が完了します。
+   DKIM CNAME records will be automatically added to Route53, and verification completes in a few minutes.
 
-#### 方法B: 手動で DNS レコードを設定
+#### Method B: Manual DNS Record Setup
 
-Route53 以外の DNS プロバイダを使用している場合：
+If using a DNS provider other than Route53:
 
-1. **CDK デプロイ（ROUTE53_HOSTED_ZONE_ID なし）**
+1. **CDK Deploy (without ROUTE53_HOSTED_ZONE_ID)**
    ```bash
    SES_DOMAIN=yourdomain.com
    cd infra && npx cdk deploy SesStack
    ```
 
-2. **出力された DKIM トークンを確認**
-   デプロイ出力に3つの DKIM トークンが表示されます。
+2. **Check Output DKIM Tokens**
+   3 DKIM tokens will be displayed in the deployment output.
 
-3. **DNS プロバイダで CNAME レコードを追加**
+3. **Add CNAME Records in DNS Provider**
    
-   各トークンに対して、以下の形式で CNAME レコードを追加：
+   Add CNAME records for each token in the following format:
    
    | Name | Type | Value |
    |------|------|-------|
@@ -137,49 +139,49 @@ Route53 以外の DNS プロバイダを使用している場合：
    | `{token2}._domainkey.yourdomain.com` | CNAME | `{token2}.dkim.amazonses.com` |
    | `{token3}._domainkey.yourdomain.com` | CNAME | `{token3}.dkim.amazonses.com` |
 
-4. **検証完了を確認**
+4. **Verify Completion**
    ```bash
    aws sesv2 get-email-identity --email-identity yourdomain.com --query "DkimAttributes.Status"
-   # "SUCCESS" と表示されれば完了
+   # Complete if "SUCCESS" is displayed
    ```
 
-### 3. SES メールアドレス検証（シンプル）
+### 3. SES Email Address Verification (Simple)
 
-特定のメールアドレスのみを検証する場合：
+To verify only specific email addresses:
 
-#### AWS コンソールで検証する場合
+#### Verify via AWS Console
 
-1. AWS コンソール → SES → Verified identities
-2. 「Create identity」→「Email address」を選択
-3. 送信元メールアドレスを入力
-4. 送信された確認メールのリンクをクリック
+1. AWS Console → SES → Verified identities
+2. "Create identity" → Select "Email address"
+3. Enter sender email address
+4. Click the link in the verification email sent
 
-#### CLI で検証する場合
+#### Verify via CLI
 
 ```bash
 aws sesv2 create-email-identity --email-identity noreply@yourdomain.com --region ap-northeast-1
-# メールが届くので、確認リンクをクリック
+# Click the verification link in the received email
 ```
 
 ---
 
-## 📧 使用方法
+## 📧 Usage
 
-### サンプル問い合わせページ
+### Sample Contact Page
 
-スターターキットには、検証用のサンプル問い合わせページが含まれています：
+The starter kit includes a sample contact page for validation:
 
 - **URL**: `/contact`
-- **ソース**: `apps/web/src/app/contact/page.tsx`
+- **Source**: `apps/web/src/app/contact/page.tsx`
 
-開発サーバーを起動して動作を確認できます：
+You can verify functionality by starting the development server:
 
 ```bash
 pnpm dev
-# http://localhost:3000/contact にアクセス
+# Access http://localhost:3000/contact
 ```
 
-### API を直接呼び出す
+### Calling API Directly
 
 ```typescript
 const response = await fetch('/api/contact', {
@@ -188,67 +190,67 @@ const response = await fetch('/api/contact', {
         'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-        name: '山田太郎',
-        email: 'yamada@example.com',
-        subject: 'お問い合わせ',
-        message: 'お問い合わせ内容をここに記入します。',
+        name: 'John Doe',
+        email: 'john@example.com',
+        subject: 'Inquiry',
+        message: 'Content of the inquiry here.',
     }),
 });
 
 const result = await response.json();
 if (result.success) {
-    console.log('送信成功:', result.messageId);
+    console.log('Success:', result.messageId);
 } else {
-    console.error('送信失敗:', result.error);
+    console.error('Failed:', result.error);
 }
 ```
 
-### ses-client を直接使用する
+### Using ses-client Directly
 
-サーバーサイドのコードから直接 `ses-client` を使用することもできます：
+You can use `ses-client` directly from server-side code:
 
 ```typescript
 import { sendContactEmail, sendEmail } from '@/lib/ses-client';
 
-// 問い合わせメール形式で送信
+// Send in contact email format
 await sendContactEmail({
-    name: '山田太郎',
-    email: 'yamada@example.com',
-    subject: 'お問い合わせ',
-    message: 'メッセージ本文',
+    name: 'John Doe',
+    email: 'john@example.com',
+    subject: 'Inquiry',
+    message: 'Message body',
 });
 
-// カスタム形式で送信
+// Send in custom format
 await sendEmail({
     to: ['recipient1@example.com', 'recipient2@example.com'],
-    subject: 'カスタムメール',
-    body: 'プレーンテキスト本文',
-    htmlBody: '<h1>HTML本文</h1>',
+    subject: 'Custom Email',
+    body: 'Plain text body',
+    htmlBody: '<h1>HTML Body</h1>',
     replyTo: 'reply@example.com',
 });
 ```
 
 ---
 
-## 📖 API リファレンス
+## 📖 API Reference
 
 ### POST /api/contact
 
-お問い合わせフォームからのメール送信 API です。
+API endpoint for sending email from contact form.
 
-#### リクエスト
+#### Request
 
-| フィールド | 型 | 必須 | 説明 |
-|-----------|-----|------|------|
-| `name` | string | ✅ | 送信者名（1-100文字） |
-| `email` | string | ✅ | 送信者メールアドレス |
-| `subject` | string | - | 件名（0-200文字） |
-| `message` | string | ✅ | メッセージ本文（1-5000文字） |
-| `to` | string \| string[] | - | 追加の送信先 |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | ✅ | Sender name (1-100 chars) |
+| `email` | string | ✅ | Sender email address |
+| `subject` | string | - | Subject (0-200 chars) |
+| `message` | string | ✅ | Message body (1-5000 chars) |
+| `to` | string \| string[] | - | Additional recipients |
 
-#### レスポンス
+#### Response
 
-**成功時 (200)**
+**Success (200)**
 ```json
 {
     "success": true,
@@ -256,7 +258,7 @@ await sendEmail({
 }
 ```
 
-**バリデーションエラー (400)**
+**Validation Error (400)**
 ```json
 {
     "success": false,
@@ -275,7 +277,7 @@ await sendEmail({
 }
 ```
 
-**サーバーエラー (500)**
+**Server Error (500)**
 ```json
 {
     "success": false,
@@ -285,136 +287,136 @@ await sendEmail({
 
 ---
 
-## ⚠️ SES サンドボックスモード
+## ⚠️ SES Sandbox Mode
 
-### サンドボックスモードとは
+### What is Sandbox Mode
 
-**新規 AWS アカウントでは、SES はサンドボックモードで動作します。**
+**New AWS accounts operate SES in Sandbox Mode.**
 
-サンドボックモードでは以下の制限があります：
+Sandbox Mode has the following limitations:
 
-| 制限 | 内容 |
-|-----|------|
-| 送信先 | **検証済みのメールアドレスにのみ** 送信可能 |
-| 送信量 | 1日200通まで |
-| 送信レート | 1秒あたり1通まで |
+| Limitation | Content |
+|------------|---------|
+| Recipients | **Only verified email addresses** can be recipients |
+| Volume | Up to 200 emails/day |
+| Rate | Up to 1 email/sec |
 
-### サンドボックスを解除する方法
+### How to Move out of Sandbox
 
-本番環境でメール機能を使用するには、サンドボックの解除申請が必要です。
+To use email function in production, you need to request production access.
 
-1. AWS コンソール → SES → Account dashboard
-2. 「Request production access」をクリック
-3. 以下の情報を入力：
-   - **Mail type**: Transactional（トランザクションメール）
-   - **Website URL**: あなたのウェブサイトURL
-   - **Use case description**: メールの使用目的を説明
-     - 例：「お問い合わせフォームからの通知メール送信に使用します」
-4. 送信して AWS からの承認を待つ（通常24-48時間）
+1. AWS Console → SES → Account dashboard
+2. Click "Request production access"
+3. Enter information:
+   - **Mail type**: Transactional
+   - **Website URL**: Your website URL
+   - **Use case description**: Explain purpose
+     - Ex: "Used for notification emails from contact form"
+4. Submit and wait for AWS approval (Usually 24-48 hours)
 
-### 開発時の対処
+### Handling during Development
 
-サンドボックスモードでも開発・テストは可能です：
+Development and testing are possible in Sandbox Mode:
 
-1. **送信元メールアドレスを検証**
+1. **Verify Sender Email Address**
    - SES → Verified identities → Create identity
-   - メールで届くリンクをクリック
+   - Click link in confirmation email
 
-2. **送信先メールアドレスも検証**
-   - 開発中はテスト用の送信先も検証が必要
-   - 同様に SES で検証を行う
+2. **Verify Recipient Email Address**
+   - Validation required for recipient address during dev
+   - Validate in SES similarly
 
-3. **検証済みメールアドレス間でテスト**
-   - 送信元・送信先ともに検証済みであればメール送信可能
-
----
-
-## 💰 料金
-
-AWS SES の料金は非常に低コストです。詳細は公式の料金ページをご確認ください。
-
-📌 **[AWS SES 料金ページ](https://aws.amazon.com/jp/ses/pricing/)**
-
-### 料金の概要
-
-| 項目 | 料金 |
-|-----|------|
-| EC2 / Amplify からの送信 | **最初の 62,000 通/月は無料**、以降 $0.10/1,000通 |
-| その他からの送信 | $0.10/1,000通 |
-| 添付ファイル | $0.12/GB |
-| 受信 | 最初の 1,000 通/月は無料、以降 $0.10/1,000通 |
-
-> **Note**: 上記は概算です。最新の正確な料金は [公式料金ページ](https://aws.amazon.com/jp/ses/pricing/) をご確認ください。
-
-### コスト試算例
-
-| ユースケース | 月間送信数 | 概算コスト |
-|------------|----------|----------|
-| 小規模サイトの問い合わせ | 100通 | **無料** |
-| 中規模サイト | 5,000通 | **無料** |
-| 大規模サイト | 100,000通 | 約 $3.80 |
+3. **Test between verified email addresses**
+   - Sending possible if both sender/recipient are verified
 
 ---
 
-## 🔍 トラブルシューティング
+## 💰 Pricing
 
-### よくあるエラー
+AWS SES pricing is very low cost. See official pricing page for details.
 
-#### 「Email was rejected」
+📌 **[AWS SES Pricing](https://aws.amazon.com/ses/pricing/)**
 
-**原因**: 送信元メールアドレスが SES で検証されていない
+### Pricing Overview
 
-**解決方法**:
-1. SES コンソールで送信元メールアドレスを検証
-2. 確認メールのリンクをクリック
-3. 環境変数 `SES_FROM_EMAIL` が正しいか確認
+| Item | Price |
+|------|-------|
+| Sending from EC2 / Amplify | **First 62,000 emails/month free**, then $0.10/1,000 emails |
+| Sending from others | $0.10/1,000 emails |
+| Attachments | $0.12/GB |
+| Receiving | First 1,000 emails/month free, then $0.10/1,000 emails |
 
-#### 「No recipient specified」
+> **Note**: Above are estimates. Please check [Official Pricing Page](https://aws.amazon.com/ses/pricing/) for latest accurate pricing.
 
-**原因**: 送信先が指定されていない
+### Cost Example
 
-**解決方法**:
-1. 環境変数 `SES_TO_EMAIL` を設定
-2. または API リクエストで `to` パラメータを指定
+| Use Case | Monthly Volume | Estimated Cost |
+|----------|----------------|----------------|
+| Small Site Inquiry | 100 emails | **Free** |
+| Medium Site | 5,000 emails | **Free** |
+| Large Site | 100,000 emails | Approx $3.80 |
 
-#### 「Access Denied」
+---
 
-**原因**: IAM 権限が不足している
+## 🔍 Troubleshooting
 
-**解決方法**:
-1. Amplify の実行ロールに SES 送信権限を追加
-2. CDK でデプロイした場合は `SesSendPolicy` をロールにアタッチ
+### Common Errors
 
-#### サンドボックスでの送信エラー
+#### "Email was rejected"
 
-**原因**: 送信先メールアドレスが検証されていない
+**Cause**: Sender email address not verified in SES
 
-**解決方法**:
-1. 送信先メールアドレスも SES で検証
-2. または本番アクセスを申請
+**Solution**:
+1. Verify sender email in SES console
+2. Click confirmation email link
+3. Check `SES_FROM_EMAIL` environment variable
 
-### ログの確認
+#### "No recipient specified"
 
-API エラーは Next.js のサーバーログに出力されます：
+**Cause**: Recipient not specified
+
+**Solution**:
+1. Set `SES_TO_EMAIL` environment variable
+2. Or specify `to` parameter in API request
+
+#### "Access Denied"
+
+**Cause**: Insufficient IAM permissions
+
+**Solution**:
+1. Add SES send permission to Amplify execution role
+2. If deployed via CDK, attach `SesSendPolicy` to role
+
+#### Sandbox Sending Error
+
+**Cause**: Recipient email address not verified
+
+**Solution**:
+1. Verify recipient email in SES
+2. Or request production access
+
+### Checking Logs
+
+API errors are output to Next.js server logs:
 
 ```bash
-# 開発時
+# Development
 pnpm dev
-# コンソールでエラーメッセージを確認
+# Check error message in console
 
-# Amplify 本番環境
-# Amplify コンソール → Monitoring → Access logs
+# Amplify Production
+# Amplify Console → Monitoring → Access logs
 ```
 
 ---
 
-## 📁 関連ファイル
+## 📁 Related Files
 
-| ファイル | 説明 |
-|---------|------|
-| `apps/web/src/lib/ses-client.ts` | SES クライアントとメール送信ユーティリティ |
-| `apps/web/src/app/api/contact/route.ts` | 問い合わせ API エンドポイント |
-| `apps/web/src/app/contact/page.tsx` | サンプル問い合わせページ |
-| `apps/web/.env.local.example` | 環境変数テンプレート |
-| `infra/lib/ses-stack.ts` | SES リソースの CDK 定義 |
-| `infra/.env.example` | インフラ環境変数テンプレート |
+| File | Description |
+|------|-------------|
+| `apps/web/src/lib/ses-client.ts` | SES Client and Email Utility |
+| `apps/web/src/app/api/contact/route.ts` | Contact API Endpoint |
+| `apps/web/src/app/contact/page.tsx` | Sample Contact Page |
+| `apps/web/.env.local.example` | Env Variable Template |
+| `infra/lib/ses-stack.ts` | SES Resource CDK Definition |
+| `infra/.env.example` | Infrastructure Env Variable Template |

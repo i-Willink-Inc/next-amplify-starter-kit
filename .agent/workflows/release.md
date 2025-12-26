@@ -1,98 +1,98 @@
 ---
-description: developブランチをmainにマージしてリリースを作成する
+description: Merge develop to main and create a release
 ---
 
-## 前提条件
+## Prerequisites
 
-- developブランチにいること
-- リリースしたい変更がdevelopブランチにコミット済みであること
-- GitHub CLIがインストールされていること
+- Must be on develop branch
+- Changes to release are committed to develop branch
+- GitHub CLI is installed
 
-## 手順
+## Procedure
 
-### 1. developブランチをpush
+### 1. Push develop branch
 
 ```bash
 git push origin develop
 ```
 
-### 2. PRを作成
+### 2. Create PR
 
 ```bash
-gh pr create --base main --head develop --title "[タイトル]" --body "[詳細]"
+gh pr create --base main --head develop --title "[Title]" --body "[Details]"
 ```
 
-- ユーザーにPRタイトルと詳細を確認する
+- Confirm PR title and details with user
 
-### 3. CIジョブの完了を待つ
+### 3. Wait for CI Jobs
 
 ```bash
-gh pr checks [PR番号] --watch
+gh pr checks [PR_NUMBER] --watch
 ```
 
-- CIが全て成功することを確認する
-- 失敗した場合は修正を行い、再度pushする
+- Confirm all CI passed
+- If failed, fix and push again
 
 // turbo
 
-### 4. PRをマージ
+### 4. Merge PR
 
 ```bash
-gh pr merge [PR番号] --merge --delete-branch=false
+gh pr merge [PR_NUMBER] --merge --delete-branch=false
 ```
 
 // turbo
 
-### 5. mainブランチに切り替えてpull
+### 5. Switch to main and pull
 
 ```bash
 git fetch origin main && git checkout main && git pull origin main
 ```
 
-### 6. 前回リリースからの変更を確認
+### 6. Check changes since last release
 
 ```bash
 git log $(git describe --tags --abbrev=0)..HEAD --oneline
 ```
 
-- このログを元にリリースノートを作成する
-- ユーザーに変更内容を確認し、リリースノートの内容を決定する
+- Create release notes based on this log
+- Confirm changes with user and decide release notes content
 
-### 7. 新しいバージョン番号を決定
+### 7. Determine Next Version
 
 ```bash
 git tag --list | sort -V | tail -3
 ```
 
-- 最新のタグを確認し、次のバージョン番号を決定する
-- セマンティックバージョニングに従う (MAJOR.MINOR.PATCH)
-  - MAJOR: 破壊的変更
-  - MINOR: 機能追加
-  - PATCH: バグ修正
+- Check latest tag and determine next version
+- Follow Semantic Versioning (MAJOR.MINOR.PATCH)
+  - MAJOR: Breaking changes
+  - MINOR: Feature additions
+  - PATCH: Bug fixes
 
-### 8. タグを作成してpush
+### 8. Create Tag and Push
 
 ```bash
 git tag v[X.Y.Z] && git push origin v[X.Y.Z]
 ```
 
-### 9. GitHubリリースを作成
+### 9. Create GitHub Release
 
 ```bash
-gh release create v[X.Y.Z] --title "v[X.Y.Z]: [タイトル]" --notes "[リリースノート]"
+gh release create v[X.Y.Z] --title "v[X.Y.Z]: [Title]" --notes "[Release Notes]"
 ```
 
-- リリースノートには手順6で確認した変更内容を Markdown形式で記載する
-- カテゴリ分け（機能追加、バグ修正、改善など）推奨
+- Use Markdown for release notes
+- Categorization (Features, Bug Fixes, Improvements, etc.) recommended
 
 // turbo
 
-### 10. developブランチに戻る
+### 10. Switch back to develop
 
 ```bash
 git checkout develop
 ```
 
-### 11. 完了報告
+### 11. Completion Report
 
-- リリースURL、タグ、含まれる変更をユーザーに報告する
+- Report Release URL, Tag, and included changes to user

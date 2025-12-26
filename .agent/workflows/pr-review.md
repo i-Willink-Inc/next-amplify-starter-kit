@@ -1,15 +1,15 @@
 ---
-description: PRのレビューとマージ手順
+description: PR Review and Merge Procedure
 ---
 
-## 前提条件
+## Prerequisites
 
-- GitHub CLIがインストールされていること
-- レビュー対象のPRが存在すること
+- GitHub CLI is installed
+- A PR to review exists
 
-## 手順
+## Procedure
 
-### 1. オープン中のPRを一覧表示
+### 1. List Open PRs
 
 ```bash
 gh pr list --state open
@@ -17,76 +17,76 @@ gh pr list --state open
 
 // turbo
 
-### 2. PR詳細を確認
+### 2. View PR Details
 
 ```bash
-gh pr view [PR番号]
+gh pr view [PR_NUMBER]
 ```
 
 // turbo
 
-### 3. PRの差分を確認
+### 3. Check PR Diff
 
 ```bash
-gh pr diff [PR番号]
+gh pr diff [PR_NUMBER]
 ```
 
 // turbo
 
-### 4. CIステータスを確認
+### 4. Check CI Status
 
 ```bash
-gh pr checks [PR番号]
+gh pr checks [PR_NUMBER]
 ```
 
 // turbo
 
-- すべてのチェックがパスしていることを確認
-- 失敗している場合は作者に修正を依頼
+- Confirm all checks passed
+- If failed, ask author to fix
 
-### 5. レビューコメントを追加（任意）
+### 5. Add Review Comments (Optional)
 
 ```bash
-gh pr review [PR番号] --comment --body "[コメント内容]"
+gh pr review [PR_NUMBER] --comment --body "[Comment Content]"
 ```
 
-### 6. レビュー結果を送信
+### 6. Submit Review
 
-#### 承認する場合
+#### Approve
 
 ```bash
-gh pr review [PR番号] --approve --body "[承認コメント]"
+gh pr review [PR_NUMBER] --approve --body "[Approval Comment]"
 ```
 
-#### 変更を要求する場合
+#### Request Changes
 
 ```bash
-gh pr review [PR番号] --request-changes --body "[修正依頼内容]"
+gh pr review [PR_NUMBER] --request-changes --body "[Request Content]"
 ```
 
-### 7. PRをマージ
+### 7. Merge PR
 
 ```bash
-gh pr merge [PR番号] --merge
+gh pr merge [PR_NUMBER] --merge
 ```
 
-- `--merge`: マージコミットを作成
-- `--squash`: コミットをスカッシュしてマージ
-- `--rebase`: リベースしてマージ
+- `--merge`: Create merge commit
+- `--squash`: Squash and merge
+- `--rebase`: Rebase and merge
 
-### 8. ローカルブランチを更新
+### 8. Update Local Branch
 
 ```bash
-git fetch origin && git pull origin [現在のブランチ]
+git fetch origin && git pull origin [current_branch]
 ```
 
 // turbo
 
-## レビューチェックリスト
+## Review Checklist
 
-- [ ] コードが読みやすく、適切にコメントされているか
-- [ ] テストが追加・更新されているか
-- [ ] ドキュメントが必要に応じて更新されているか
-- [ ] 破壊的変更がないか、またはCHANGELOGに記載されているか
-- [ ] セキュリティ上の問題がないか
-- [ ] パフォーマンスへの悪影響がないか
+- [ ] Code is readable and properly commented
+- [ ] Tests are added/updated
+- [ ] Documentation is updated if necessary
+- [ ] No breaking changes, or documented in CHANGELOG
+- [ ] No security issues
+- [ ] No negative impact on performance

@@ -1,14 +1,14 @@
 ---
-description: Conventional Commitsに従ったコミットを作成する
+description: Create a commit following Conventional Commits
 ---
 
-## 前提条件
+## Prerequisites
 
-- 変更がステージングされていること、またはステージングする変更があること
+- Changes are staged, or there are changes to stage
 
-## 手順
+## Procedure
 
-### 1. 変更内容を確認
+### 1. Check Changes
 
 ```bash
 git status && git diff --stat
@@ -16,18 +16,18 @@ git status && git diff --stat
 
 // turbo
 
-### 2. 変更をステージング
+### 2. Stage Changes
 
 ```bash
-git add [ファイルパス]
+git add [file_path]
 ```
 
-- 関連する変更のみをステージングする
-- 異なる目的の変更は別々のコミットにする
+- Stage only related changes
+- Separate commits for changes with different purposes
 
-### 3. コミットメッセージを作成
+### 3. Create Commit Message
 
-Conventional Commits形式に従う：
+Follow Conventional Commits format:
 
 ```
 <type>(<scope>): <description>
@@ -37,37 +37,37 @@ Conventional Commits形式に従う：
 [optional footer(s)]
 ```
 
-#### タイプ一覧
+#### Types
 
-| タイプ | 説明 | 例 |
-|--------|------|-----|
-| `feat` | 新機能 | `feat(auth): add login feature` |
-| `fix` | バグ修正 | `fix(api): resolve null pointer` |
-| `docs` | ドキュメント変更 | `docs: update README` |
-| `style` | コードスタイル変更（動作に影響なし） | `style: format code` |
-| `refactor` | リファクタリング | `refactor(utils): simplify helper` |
-| `perf` | パフォーマンス改善 | `perf(query): optimize database` |
-| `test` | テスト追加・修正 | `test: add unit tests` |
-| `chore` | ビルド・補助ツール変更 | `chore: update dependencies` |
-| `ci` | CI設定変更 | `ci: add GitHub Actions` |
+| Type | Description | Example |
+|------|-------------|---------|
+| `feat` | New feature | `feat(auth): add login feature` |
+| `fix` | Bug fix | `fix(api): resolve null pointer` |
+| `docs` | Documentation change | `docs: update README` |
+| `style` | Code style change (formatting, etc.) | `style: format code` |
+| `refactor` | Refactoring (no functional change) | `refactor(utils): simplify helper` |
+| `perf` | Performance improvement | `perf(query): optimize database` |
+| `test` | Adding/fixing tests | `test: add unit tests` |
+| `chore` | Build/Auxiliary tool change | `chore: update dependencies` |
+| `ci` | CI config change | `ci: add GitHub Actions` |
 
-#### スコープ（任意）
+#### Scope (Optional)
 
-変更が影響する範囲を括弧内に記載：
-- `auth`, `api`, `ui`, `db`, `config` など
+Specify scope in parentheses:
+- `auth`, `api`, `ui`, `db`, `config`, etc.
 
-#### 破壊的変更
+#### Breaking Change
 
-- タイプの後に `!` を追加: `feat!: breaking change`
-- または、フッターに `BREAKING CHANGE:` を記載
+- Add `!` after type: `feat!: breaking change`
+- Or add `BREAKING CHANGE:` in footer
 
-### 4. コミットを実行
+### 4. Execute Commit
 
 ```bash
 git commit -m "<type>(<scope>): <description>"
 ```
 
-### 5. コミット履歴を確認
+### 5. Verify Commit History
 
 ```bash
 git log --oneline -5
@@ -75,9 +75,9 @@ git log --oneline -5
 
 // turbo
 
-## ベストプラクティス
+## Best Practices
 
-- descriptionは命令形で記載（"add", "fix", "update" など）
-- 50文字以内に収める
-- 末尾にピリオドを付けない
-- 1つのコミットには1つの論理的変更のみ含める
+- Use imperative mood for description ("add", "fix", "update", etc.)
+- Keep it under 50 characters
+- Do not end with a period
+- Include only one logical change per commit

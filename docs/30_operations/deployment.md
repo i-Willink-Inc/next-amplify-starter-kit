@@ -1,75 +1,77 @@
-# デプロイ手順
+# Deployment Guide
 
-> **最終更新**: 2025-12-16  
-> **ステータス**: Approved
+[日本語 (Japanese)](deployment.ja.md)
 
-## 概要
+> **Last Updated**: 2025-12-16
+> **Status**: Approved
 
-このプロジェクトでは、AWS Amplify を使用して Next.js アプリケーションをホスティングします。
-デプロイ方法は **ローカルから手動** と **GitHub Actions から自動** の2パターンに対応しています。
+## Overview
+
+This project uses AWS Amplify to host the Next.js application.
+It supports two deployment methods: **Manual from Local** and **Automatic from GitHub Actions**.
 
 ---
 
-## GitHub トークンの管理方法
+## GitHub Token Management
 
-| 方法 | 推奨度 | セキュリティ | コスト |
-|------|-------|-------------|-------|
-| **Secrets Manager（デフォルト）** | ⭐ 推奨 | ◎ 高い | 月額約$0.40 |
-| 環境変数 | 開発用 | ○ 中程度 | 無料 |
+| Method | Recommendation | Security | Cost |
+|--------|----------------|----------|------|
+| **Secrets Manager (Default)** | ⭐ Recommended | ◎ High | Approx $0.40/month |
+| Environment Variable | For Development | ○ Medium | Free |
 
-### 切り替え方法
+### How to Switch
 
 ```bash
-# デフォルト: Secrets Manager を使用（推奨）
+# Default: Use Secrets Manager (Recommended)
 npx cdk deploy
 
-# コスト削減: 環境変数を使用
+# Cost Reduction: Use Environment Variables
 USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
 ```
 
 ---
 
-## デプロイフロー
+## Deployment Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Step 1: CDKデプロイ（ローカル or GitHub Actions）               │
-│          → AWS 上に Amplify サービスを作成                       │
-│          → GitHub リポジトリと連携設定                           │
+│  Step 1: CDK Deploy (Local or GitHub Actions)                   │
+│          → Create Amplify service on AWS                        │
+│          → Set up GitHub repository connection                  │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│  Step 2: main ブランチにマージ                                   │
-│          → Amplify が変更を自動検知                              │
-│          → amplify.yml に従ってビルド・デプロイ                  │
+│  Step 2: Merge to main branch                                   │
+│          → Amplify automatically detects changes                │
+│          → Build and deploy according to amplify.yml            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 事前準備
+## Preparation
 
-### 1. GitHub Personal Access Token (PAT) の作成
+### 1. Create GitHub Personal Access Token (PAT)
 
 1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
-2. 「Generate new token」をクリック
-3. スコープを選択:
+2. Click "Generate new token"
+3. Select Scopes:
    - `repo` (Full control of private repositories)
    - `admin:repo_hook` (Full control of repository hooks)
-4. トークンをコピーして安全に保存
+4. Copy and securely save the token
 
-### 2. GitHub トークンの保存（方法を選択）
+### 2. Save GitHub Token (Select Method)
 
-#### 方法A: Secrets Manager（推奨）
+#### Method A: Secrets Manager (Recommended)
 
 ```bash
 aws secretsmanager create-secret \
   --name github/amplify-token \
   --secret-string "ghp_xxxxxxxxxxxxxxxx" \
-  --region ap-northeast-1
+  --region ap-northeast-1 # Example region
 ```
 
-#### 方法B: 環境変数（コスト削減）
+#### Method B: Environment Variable (Cost Reduction)
 
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
@@ -78,141 +80,141 @@ export USE_SECRETS_MANAGER=false
 
 ---
 
-## パターン1: ローカルからのデプロイ
+## Pattern 1: Deployment from Local
 
-### 1.1 AWS 認証の設定
+### 1.1 AWS Auth Setup
 
-**方法A: .env ファイル（推奨）**
+**Method A: .env file (Recommended)**
 
-`infra/.env` ファイルを作成し、必要な値を設定します（`.env.example` を参照）。
+Create `infra/.env` file and set necessary values (refer to `.env.example`).
 
 ```bash
 cp infra/.env.example infra/.env
-# infra/.env を編集して認証情報を設定
+# Edit infra/.env to set credentials
 ```
 
-**方法B: 環境変数（直接エクスポート）**
+**Method B: Environment Variables (Export directly)**
 ```bash
 export AWS_ACCESS_KEY_ID=xxxxx
 export AWS_SECRET_ACCESS_KEY=xxxxx
-export AWS_DEFAULT_REGION=ap-northeast-1
+export AWS_DEFAULT_REGION=ap-northeast-1 # Example region
 ```
 
-**方法C: AWS SSO**
+**Method C: AWS SSO**
 ```bash
 aws sso login --profile your-profile
 export AWS_PROFILE=your-profile
 ```
 
-### 1.2 CDK デプロイ
+### 1.2 CDK Deploy
 
 ```bash
 cd infra
 
-# .env ファイルがある場合は自動的に読み込まれます
+# Loaded automatically if .env file exists
 npx cdk deploy
 
-# または環境変数を使用（コスト削減）
+# Or use environment variables (Cost Reduction)
 USE_SECRETS_MANAGER=false GITHUB_TOKEN=ghp_xxx npx cdk deploy
 ```
 
 ---
 
-## パターン2: GitHub Actions からのデプロイ
+## Pattern 2: Deployment from GitHub Actions
 
-### 2.1 GitHub Secrets の設定
+### 2.1 GitHub Secrets Setup
 
-| Secret 名 | 値 | 用途 |
-|----------|-----|------|
-| `GH_PAT` | `ghp_xxxxxxxx` | GitHub PAT（USE_SECRETS_MANAGER=false 時のみ必要） |
-| `AWS_ROLE_ARN` | `arn:aws:iam::xxx:role/xxx` | OIDC認証用 |
+| Secret Name | Value | Usage |
+|-------------|-------|-------|
+| `GH_PAT` | `ghp_xxxxxxxx` | GitHub PAT (Only required if USE_SECRETS_MANAGER=false) |
+| `AWS_ROLE_ARN` | `arn:aws:iam::xxx:role/xxx` | For OIDC Auth |
 
-または:
+Or:
 
-| Secret 名 | 値 |
-|----------|-----|
-| `AWS_ACCESS_KEY_ID` | アクセスキーID |
-| `AWS_SECRET_ACCESS_KEY` | シークレットキー |
+| Secret Name | Value |
+|-------------|-------|
+| `AWS_ACCESS_KEY_ID` | Access Key ID |
+| `AWS_SECRET_ACCESS_KEY` | Secret Key |
 
-### 2.2 ワークフローのトリガー
+### 2.2 Workflow Trigger
 
-- **自動**: `infra/` または `amplify.yml` の変更が `main` にマージされた時
-- **手動**: Actions → Deploy Infrastructure → Run workflow
-  - `use_secrets_manager`: `true`（推奨）または `false`（コスト削減）
+- **Auto**: When changes in `infra/` or `amplify.yml` are merged to `main`
+- **Manual**: Actions → Deploy Infrastructure → Run workflow
+  - `use_secrets_manager`: `true` (Recommended) or `false` (Cost Reduction)
 
 ---
 
-## 独自ドメインの設定（オプション）
+## Custom Domain Setup (Optional)
 
-Route53 に登録されているドメインを Amplify アプリに適用できます。
-設定すると、ルートドメイン (`example.com`) と `www` サブドメイン (`www.example.com`) が自動的に設定されます。
+You can apply a domain registered in Route53 to the Amplify app.
+If set, the root domain (`example.com`) and `www` subdomain (`www.example.com`) are automatically configured.
 
-> **前提**: 同一 AWS アカウントの Route53 に Hosted Zone が作成されていること。
+> **Prerequisite**: Hosted Zone must be created in Route53 of the same AWS account.
 
-### 設定方法
+### Setup Method
 
-**ローカルデプロイ (.env)**
+**Local Deploy (.env)**
 ```bash
 # infra/.env
 DOMAIN_NAME=example.com
 ```
 
-**ローカルデプロイ (Context)**
+**Local Deploy (Context)**
 ```bash
 npx cdk deploy -c domainName=example.com
 ```
 
 **GitHub Actions**
-現在、環境変数 `DOMAIN_NAME` を渡す設定を追加する必要があります（必要に応じて workflow を修正してください）。
+Currently, you need to add settings to pass the `DOMAIN_NAME` environment variable (Modify workflow as needed).
 
 ---
 
-## 前提となる権限設定
+## Prerequisite Permissions
 
-デプロイには以下の権限が必要です。
+The following permissions are required for deployment.
 
-### 1. AWS IAM 権限（Deployer）
+### 1. AWS IAM Permission (Deployer)
 
-CDK デプロイを実行する IAM ユーザーまたはロールには、以下の権限が必要です。
-最も簡単な推奨設定は **`AdministratorAccess`** ポリシーの付与です。
+The IAM user or role executing CDK deploy needs the following permissions.
+The easiest recommendation is to attach **`AdministratorAccess`** policy.
 
-最小権限で運用する場合は、以下のサービスへのフルアクセスが必要です：
-- **CloudFormation**: スタックの作成・更新
-- **S3**: アセットファイルのアップロード
-- **IAM**: Amplify 用ロールの作成 (PassRole 含む)
-- **Amplify**: アプリ・ブランチ・バックエンドの作成
-- **Secrets Manager**: 読み取り権限（Secrets Manager 利用時）
-- **SSM**: CDK Bootstrap 関連パラメータの読み取り
+For least privilege operation, full access to the following services is required:
+- **CloudFormation**: Create/Update stacks
+- **S3**: Upload asset files
+- **IAM**: Create roles for Amplify (including PassRole)
+- **Amplify**: Create App/Branch/Backend
+- **Secrets Manager**: Read permission (When using Secrets Manager)
+- **SSM**: Read CDK Bootstrap related parameters
 
 ### 2. GitHub Personal Access Token (PAT)
 
-`repo` と `admin:repo_hook` のスコープが必要です（[手順1](#1-github-personal-access-token-pat-の作成)参照）。
+Requires `repo` and `admin:repo_hook` scopes (See [Step 1](#1-create-github-personal-access-token-pat)).
 
 ---
 
-## 必要な設定一覧
+## Required Configuration List
 
-### Secrets Manager 使用時（推奨）
+### Using Secrets Manager (Recommended)
 
-| 設定場所 | 名前 | 説明 |
-|---------|------|------|
+| Location | Name | Description |
+|----------|------|-------------|
 | AWS Secrets Manager | `github/amplify-token` | GitHub PAT |
-| GitHub Secrets | `AWS_ROLE_ARN` または `AWS_ACCESS_KEY_ID` | AWS認証 |
+| GitHub Secrets | `AWS_ROLE_ARN` or `AWS_ACCESS_KEY_ID` | AWS Auth |
 
-### 環境変数使用時（コスト削減）
+### Using Environment Variables (Cost Reduction)
 
-| 設定場所 | 名前 | 説明 |
-|---------|------|------|
+| Location | Name | Description |
+|----------|------|-------------|
 | GitHub Secrets | `GH_PAT` | GitHub PAT |
-| GitHub Secrets | `AWS_ROLE_ARN` または `AWS_ACCESS_KEY_ID` | AWS認証 |
-| ローカル/CI | `USE_SECRETS_MANAGER=false` | 切り替えフラグ |
+| GitHub Secrets | `AWS_ROLE_ARN` or `AWS_ACCESS_KEY_ID` | AWS Auth |
+| Local / CI | `USE_SECRETS_MANAGER=false` | Switch flag |
 
 ---
 
-## トラブルシューティング
+## Troubleshooting
 
-| エラー | 原因 | 解決方法 |
-|-------|------|---------|
-| `Secrets Manager secret not found` | シークレット未作成 | `aws secretsmanager create-secret` を実行 |
-| `GitHub token is required` | `USE_SECRETS_MANAGER=false` なのに `GITHUB_TOKEN` 未設定 | 環境変数を設定 |
-| `Access Denied` | IAM 権限不足 | 必要な権限を付与 |
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `Secrets Manager secret not found` | Secret not created | Run `aws secretsmanager create-secret` |
+| `GitHub token is required` | `GITHUB_TOKEN` not set despite `USE_SECRETS_MANAGER=false` | Set environment variable |
+| `Access Denied` | Insufficient IAM permissions | Grant necessary permissions |

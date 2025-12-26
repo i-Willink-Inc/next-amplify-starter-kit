@@ -1,17 +1,17 @@
 ---
-description: ユニットテストを生成するワークフロー
+description: Workflow to generate unit tests
 ---
 
-## 手順
+## Procedure
 
-1. 対象ファイルを特定する
-2. Vitest を使用してテストファイルを作成
-3. テストファイルはソースと同じディレクトリに配置（例: Button.tsx → Button.test.tsx）
-4. 主要な機能とエッジケースをカバー
-5. `pnpm test` で実行確認
+1. Identify target file
+2. Create test file using Vitest
+3. Place test file in the same directory as source (e.g., Button.tsx → Button.test.tsx)
+4. Cover main features and edge cases
+5. Verify execution with `pnpm test`
 
-## テスト命名規則
+## Test Naming Convention
 
-- テストファイル: `*.test.ts` または `*.test.tsx`
-- describe: 機能やコンポーネント名
-- it/test: 期待される動作を日本語または英語で記述
+- Test file: `*.test.ts` or `*.test.tsx`
+- describe: Feature or component name
+- it/test: Describe expected behavior
