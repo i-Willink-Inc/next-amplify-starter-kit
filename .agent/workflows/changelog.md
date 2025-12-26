@@ -1,60 +1,60 @@
 ---
-description: コミット履歴からCHANGELOGを生成・更新する
+description: Generate and update CHANGELOG from commit history
 ---
 
-## 前提条件
+## Prerequisites
 
-- gitリポジトリ内にいること
-- Conventional Commitsに従ったコミットメッセージが使用されていること
+- Must be inside a git repository
+- Commit messages must follow Conventional Commits
 
-## 手順
+## Procedure
 
-### 1. 前回リリースからのコミット履歴を取得
+### 1. Get commit history since last release
 
 ```bash
 git log $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~50")..HEAD --pretty=format:"%h %s" --no-merges
 ```
 
-- タグがない場合は直近50コミットを表示
+- If no tags exist, show last 50 commits
 
-### 2. コミットをカテゴリ別に分類
+### 2. Categorize commits
 
-コミットメッセージのプレフィックスに基づいて分類：
+Categorize based on commit message prefix:
 
-| プレフィックス | カテゴリ |
-|---------------|---------|
-| `feat:` | ✨ 新機能 |
-| `fix:` | 🐛 バグ修正 |
-| `docs:` | 📚 ドキュメント |
-| `style:` | 💄 スタイル |
-| `refactor:` | ♻️ リファクタリング |
-| `perf:` | ⚡ パフォーマンス改善 |
-| `test:` | ✅ テスト |
-| `chore:` | 🔧 雑務・メンテナンス |
+| Prefix | Category |
+|--------|----------|
+| `feat:` | ✨ New Features |
+| `fix:` | 🐛 Bug Fixes |
+| `docs:` | 📚 Documentation |
+| `style:` | 💄 Styles |
+| `refactor:` | ♻️ Refactoring |
+| `perf:` | ⚡ Performance Improvements |
+| `test:` | ✅ Tests |
+| `chore:` | 🔧 Chores/Maintenance |
 | `ci:` | 👷 CI/CD |
 
-### 3. CHANGELOG.mdを更新
+### 3. Update CHANGELOG.md
 
-- 日付とバージョン番号を含むセクションを追加
-- カテゴリごとに変更をリスト化
-- 破壊的変更がある場合は `⚠️ BREAKING CHANGES` セクションを追加
+- Add section with date and version number
+- List changes by category
+- Add `⚠️ BREAKING CHANGES` section if there are breaking changes
 
-### 4. フォーマット例
+### 4. Format Example
 
 ```markdown
 ## [X.Y.Z] - YYYY-MM-DD
 
-### ✨ 新機能
-- feat: 新機能の説明 (#PR番号)
+### ✨ New Features
+- feat: Description of new feature (#PR_NUMBER)
 
-### 🐛 バグ修正
-- fix: 修正内容の説明 (#PR番号)
+### 🐛 Bug Fixes
+- fix: Description of fix (#PR_NUMBER)
 
-### ♻️ リファクタリング
-- refactor: リファクタリング内容 (#PR番号)
+### ♻️ Refactoring
+- refactor: Description of refactoring (#PR_NUMBER)
 ```
 
-### 5. 変更をコミット
+### 5. Commit Changes
 
 ```bash
 git add CHANGELOG.md && git commit -m "docs: update CHANGELOG for vX.Y.Z"

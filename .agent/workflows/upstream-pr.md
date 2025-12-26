@@ -1,202 +1,202 @@
 ---
-description: フォーク元のOSSリポジトリに新機能のPRを作成する
+description: Create PR for a new feature to the upstream OSS repository
 ---
 
-## 概要
+## Overview
 
-フォークしたリポジトリで開発した機能を、フォーク元（upstream）のOSSリポジトリにPRとして提出するワークフローです。
+Workflow to submit features developed in a forked repository as a PR to the original (upstream) OSS repository.
 
-## 前提条件
+## Prerequisites
 
-- フォーク元のリポジトリがupstreamリモートとして設定されていること
-- 提出する機能が自己完結していること
-- テストが通過していること
+- Original repository must be set as upstream remote
+- Feature must be self-contained
+- Tests must pass
 
-## 手順
+## Procedure
 
-### 1. upstreamリモートの確認・設定
+### 1. Check/Set upstream remote
 
 ```bash
-# リモート一覧を確認
+# Check remotes
 git remote -v
 
-# upstreamが未設定の場合は追加
+# Add upstream if not set
 git remote add upstream https://github.com/ORIGINAL_OWNER/ORIGINAL_REPO.git
 ```
 
 // turbo
 
-### 2. フォーク元の最新版を取得
+### 2. Get latest from fork source
 
 ```bash
-# upstream の最新を fetch
+# Fetch latest from upstream
 git fetch upstream
 
-# 最新タグを確認
+# Check latest tag
 git describe --tags upstream/main --abbrev=0
 ```
 
 // turbo
 
-### 3. 差分の確認
+### 3. Check differences
 
 ```bash
-# フォーク元からの差分コミットを表示
+# Show commit diffs from upstream
 git log upstream/main..HEAD --oneline --no-merges
 
-# ファイル差分のサマリを表示
+# Show file diff summary
 git diff upstream/main --stat
 ```
 
 // turbo
 
-### 4. PR用ブランチの作成
+### 4. Create Branch for PR
 
-フォーク元の最新版をベースに新しいブランチを作成：
+Create a new branch based on upstream's latest:
 
 ```bash
-# 機能名を含むブランチ名で作成
-git checkout -b feature/[機能名] upstream/main
+# Create with feature name
+git checkout -b feature/[feature_name] upstream/main
 ```
 
-### 5. 機能のチェリーピックまたはリベース
+### 5. Cherry-pick or Rebase feature
 
-#### 方法A: 関連コミットをチェリーピック（推奨）
+#### Method A: Cherry-pick related commits (Recommended)
 
-特定の機能に関連するコミットのみを選択：
+Select only commits related to the feature:
 
 ```bash
-# 必要なコミットを特定
+# Identify necessary commits
 git log --oneline origin/main
 
-# 関連コミットをチェリーピック
+# Cherry-pick related commits
 git cherry-pick <commit-hash1> <commit-hash2> ...
 ```
 
-#### 方法B: インタラクティブリベース
+#### Method B: Interactive Rebase
 
-複数コミットを整理してまとめる場合：
+To organize multiple commits:
 
 ```bash
 git rebase -i upstream/main
 ```
 
-### 6. 競合の解決
+### 6. Resolve Conflicts
 
-競合が発生した場合：
+If conflicts occur:
 
 ```bash
-# 競合ファイルを確認
+# Check conflicting files
 git status
 
-# 手動で競合を解決後
+# After resolving manually
 git add <resolved-files>
 git cherry-pick --continue
-# または
+# or
 git rebase --continue
 ```
 
-### 7. ビルド・テストの検証
+### 7. Verify Build/Test
 
 ```bash
-# 依存関係のインストール
+# Install dependencies
 pnpm install
 
-# ビルド検証
+# Verify build
 pnpm build
 
-# テスト実行
+# Run tests
 pnpm test
 
-# lint チェック
+# Lint check
 pnpm lint
 ```
 
 // turbo
 
-### 8. コミットメッセージの整理
+### 8. Organize Commit Messages
 
-OSS向けにコミットメッセージを整理：
+Organize messages for OSS:
 
-- Conventional Commits形式に従う
-- スコープを明確にする（例: `feat(ses): add email functionality`）
-- 英語で記載（OSSの場合）
-- 関連Issueがあればリファレンスを追加
+- Follow Conventional Commits format
+- Clarify scope (e.g., `feat(ses): add email functionality`)
+- Write in English (for OSS)
+- Add references if related Issues exist
 
 ```bash
-# 必要に応じてコミットを修正
+# Amend commit if necessary
 git commit --amend
 ```
 
-### 9. フォークリポジトリにプッシュ
+### 9. Push to Fork Repository
 
 ```bash
-git push origin feature/[機能名]
+git push origin feature/[feature_name]
 ```
 
-### 10. PRの作成
+### 10. Create PR
 
-GitHubでPRを作成：
+Create PR on GitHub:
 
 ```bash
-# GitHub CLIを使用する場合
+# Using GitHub CLI
 gh pr create --repo ORIGINAL_OWNER/ORIGINAL_REPO \
-  --title "feat(scope): 機能の説明" \
-  --body "## 概要
-機能の説明
+  --title "feat(scope): Feature Description" \
+  --body "## Overview
+Feature Description
 
-## 変更内容
-- 変更点1
-- 変更点2
+## Changes
+- Change 1
+- Change 2
 
-## テスト
-テスト方法の説明
+## Testing
+Description of testing method
 
-## チェックリスト
-- [ ] テストが通過している
-- [ ] ドキュメントを更新した
-- [ ] CHANGELOG.mdに記載した（該当する場合）"
+## Checklist
+- [ ] Tests passed
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated (if applicable)"
 ```
 
-または GitHub Web UI で作成。
+Or create via GitHub Web UI.
 
-### 11. PR作成後の対応
+### 11. Post-Creation Actions
 
-- CIが通過することを確認
-- レビューコメントに対応
-- 必要に応じてコミットを追加・修正
+- Ensure CI passes
+- Address review comments
+- Add/Fix commits as necessary
 
-## チェックリスト
+## Checklist
 
-- [ ] upstream の最新版を取得した
-- [ ] 差分を確認した
-- [ ] PR用ブランチを作成した
-- [ ] 関連コミットをチェリーピック/リベースした
-- [ ] 競合を解決した
-- [ ] ビルドが成功した
-- [ ] テストが通過した
-- [ ] コミットメッセージを整理した
-- [ ] PRを作成した
+- [ ] Fetched latest upstream
+- [ ] Checked differences
+- [ ] Created PR branch
+- [ ] Cherry-picked/Rebased related commits
+- [ ] Resolved conflicts
+- [ ] Build succeeded
+- [ ] Tests passed
+- [ ] Organized commit messages
+- [ ] Created PR
 
-## 注意事項
+## Notes
 
-### スターターキット固有の設定を除外
+### Exclude Starter Kit Specific Settings
 
-PRに含めるべきでないもの：
+Do not include in PR:
 
-- 環境固有の設定（`.env.local`など）
-- プロジェクト固有のカスタマイズ
-- フォーク固有のワークフロー（このリポジトリの `.agent/workflows` など）
+- Environment specific settings (`.env.local`, etc.)
+- Project specific customizations
+- Fork specific workflows (e.g., `.agent/workflows` in this repo)
 
-### ドキュメントの更新
+### Documentation Update
 
-OSS向けのPRには以下を含める：
+Include in OSS PR:
 
-- 機能のドキュメント
-- README への追記（該当する場合）
-- 使用例やセットアップ手順
+- Feature documentation
+- Additions to README (if applicable)
+- Usage examples or setup instructions
 
-### CHANGELOG の扱い
+### CHANGELOG Handling
 
-- **フォーク先（このリポジトリ）**: フォーク元との差分を記録
-- **フォーク元へのPR**: フォーク元のCHANGELOG規約に従う（通常、マージ時にメンテナが更新）
+- **Fork (This Repo)**: Record diffs from upstream
+- **PR to Upstream**: Follow upstream's CHANGELOG rules (usually maintained by maintainers on merge)

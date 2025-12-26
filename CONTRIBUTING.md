@@ -1,34 +1,36 @@
-# コントリビューションガイド
+# Contributing Guide
 
-Next.js Amplify Starter Kit へのコントリビューションを歓迎します！
+[日本語 (Japanese)](CONTRIBUTING.ja.md)
 
-## 開発の流れ
+Welcome to contribute to Next.js Amplify Starter Kit!
 
-1. リポジトリをフォーク
-2. feature ブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'feat: Add amazing feature'`)
-4. ブランチをプッシュ (`git push origin feature/amazing-feature`)
-5. Pull Request を作成
+## Development Flow
 
-## コミットメッセージ規約
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Create a Pull Request
 
-[Conventional Commits](https://www.conventionalcommits.org/) 形式を使用します。
+## Commit Message Convention
 
-| プレフィックス | 用途 |
-|--------------|------|
-| `feat:` | 新機能 |
-| `fix:` | バグ修正 |
-| `docs:` | ドキュメント変更 |
-| `style:` | コードスタイル変更 |
-| `refactor:` | リファクタリング |
-| `test:` | テスト追加・修正 |
-| `chore:` | その他の変更 |
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
-## コードスタイル
+| Prefix | Usage |
+|--------|-------|
+| `feat:` | New features |
+| `fix:` | Bug fixes |
+| `docs:` | Documentation changes |
+| `style:` | Code style changes (formatting, missing semi colons, etc) |
+| `refactor:` | Refactoring (no functional changes) |
+| `test:` | Adding or fixing tests |
+| `chore:` | Other changes (build process, auxiliary tools, libraries) |
 
-- ESLint + Prettier の設定に従う
-- `pnpm lint` と `pnpm format` を実行してから PR 作成
+## Code Style
 
-## 質問・サポート
+- Follow the ESLint + Prettier settings.
+- Run `pnpm lint` and `pnpm format` before creating a PR.
 
-Issue を作成するか、Discussions で質問してください。
+## Questions & Support
+
+Please create an Issue or ask in Discussions.

@@ -1,169 +1,169 @@
 ---
-description: スターターキットに新しいオプション機能を追加する
+description: Add a new optional feature to the starter kit
 ---
 
-## 概要
+## Overview
 
-このワークフローは、スターターキットにカスタマイズ可能なオプション機能を追加する際の手順を定義します。
-例: AWS SES メール送信、認証機能、データベース連携など
+This workflow defines the procedure for adding customizable optional features to the starter kit.
+Examples: AWS SES email sending, authentication, database integration, etc.
 
-## 前提条件
+## Prerequisites
 
-- 機能の要件が明確であること
-- 必要な AWS サービスや外部サービスが特定されていること
+- Feature requirements must be clear
+- Required AWS services and external services must be identified
 
-## 手順
+## Procedure
 
-### 1. 要件の明確化
+### 1. Clarify Requirements
 
-ユーザーと以下を確認：
+Confirm the following with the user:
 
-- **機能の目的**: 何を実現するか
-- **使用するサービス**: AWS サービス、外部 API など
-- **設定の柔軟性**: どの部分をカスタマイズ可能にするか
-- **前提条件**: Route53、ドメイン、アカウント設定など
+- **Purpose of Feature**: What to achieve
+- **Services to Use**: AWS services, external APIs, etc.
+- **Flexibility of Configuration**: Which parts should be customizable
+- **Prerequisites**: Route53, domain, account settings, etc.
 
-### 2. 実装計画の作成
+### 2. Create Implementation Plan
 
-以下の構成で計画を立てる：
+Plan with the following structure:
 
-| コンポーネント | 説明 |
-|--------------|------|
-| CDK Stack | インフラリソースの定義 |
-| Next.js API | バックエンド処理 |
-| UI コンポーネント | フロントエンド（必要に応じて） |
-| 環境変数 | 設定可能なパラメータ |
-| ドキュメント | セットアップ・使用方法 |
+| Component | Description |
+|-----------|-------------|
+| CDK Stack | Definition of infrastructure resources |
+| Next.js API | Backend processing |
+| UI Components | Frontend (if necessary) |
+| Environment Variables | Configurable parameters |
+| Documentation | Setup and usage instructions |
 
-### 3. CDK Stack の実装
+### 3. Implement CDK Stack
 
-`infra/lib/` に新しい Stack を作成：
+Create a new Stack in `infra/lib/`:
 
 ```typescript
 // infra/lib/[feature]-stack.ts
 export class FeatureStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: FeatureStackProps) {
         super(scope, id, props);
-        // リソース定義
+        // Resource definitions
     }
 }
 ```
 
-**設計ポイント:**
-- 環境変数でオン/オフ切り替え可能に
-- 関連する AWS サービス（Route53、IAM など）との統合
-- 必要な IAM ポリシーの作成
+**Design Points:**
+- Toggle on/off via environment variables
+- Integration with related AWS services (Route53, IAM, etc.)
+- Creation of necessary IAM policies
 
-### 4. CDK エントリポイントの更新
+### 4. Update CDK Entry Point
 
-`infra/bin/app.ts` に条件付きでスタックを追加：
+Add the stack conditionally in `infra/bin/app.ts`:
 
 ```typescript
-// 環境変数が設定されている場合のみデプロイ
+// Deploy only if environment variable is set
 if (process.env.FEATURE_ENABLED) {
     new FeatureStack(app, 'FeatureStack', { ... });
 }
 ```
 
-### 5. 環境変数テンプレートの更新
+### 5. Update Environment Variable Templates
 
-以下のファイルに設定を追加：
+Add settings to the following files:
 
-- `infra/.env.example` - CDK 用
-- `apps/web/.env.local.example` - Next.js 用
+- `infra/.env.example` - For CDK
+- `apps/web/.env.local.example` - For Next.js
 
-**形式:**
+**Format:**
 ```bash
 # =============================================================================
-# [機能名] Configuration (Optional)
+# [Feature Name] Configuration (Optional)
 # =============================================================================
-# 説明コメント
+# Description comment
 # FEATURE_VAR=value
 ```
 
-### 6. Next.js API の実装
+### 6. Implement Next.js API
 
-`apps/web/src/app/api/[feature]/route.ts` を作成：
+Create `apps/web/src/app/api/[feature]/route.ts`:
 
-- Zod によるバリデーション
-- AWS SDK v3 の使用
-- 適切なエラーハンドリング
-- CORS 対応
+- Validation with Zod
+- Usage of AWS SDK v3
+- Proper error handling
+- CORS support
 
-### 7. ユーティリティ関数の実装
+### 7. Implement Utility Functions
 
-`apps/web/src/lib/[feature]-client.ts` を作成：
+Create `apps/web/src/lib/[feature]-client.ts`:
 
-- 再利用可能な関数
-- TypeScript 型定義
-- JSDoc コメント
+- Reusable functions
+- TypeScript type definitions
+- JSDoc comments
 
-### 8. サンプル/デモページの作成
+### 8. Create Sample/Demo Page
 
-`apps/web/src/app/[feature]/page.tsx` を作成：
+Create `apps/web/src/app/[feature]/page.tsx`:
 
-- 機能の動作確認用
-- 「Demo page」ラベルを表示
-- スターターキットのデザインに合わせる
+- For verifying feature operation
+- Display "Demo page" label
+- Match starter kit design
 
-### 9. ドキュメントの作成
+### 9. Create Documentation
 
-`docs/20_development/[feature]-guide.md` を作成：
+Create `docs/20_development/[feature]-guide.md`:
 
-**必須セクション:**
-- 概要
-- 前提条件
-- セットアップ手順（CDK 自動/手動の両方）
-- 使用方法
-- API リファレンス
-- 料金情報（該当する場合）
-- トラブルシューティング
+**Required Sections:**
+- Overview
+- Prerequisites
+- Setup Procedure (Both CDK Auto/Manual)
+- Usage
+- API Reference
+- Pricing Information (If applicable)
+- Troubleshooting
 
-### 10. README の更新
+### 10. Update README
 
-以下を更新：
+Update the following:
 
-- 特徴テーブルに機能を追加
-- ドキュメントリンクを追加
+- Add feature to features table
+- Add documentation link
 
-### 11. ビルド検証
+### 11. Build Verification
 
 ```bash
-# Next.js ビルド
+# Next.js Build
 cd apps/web && pnpm build
 
-# CDK ビルド
+# CDK Build
 cd infra && pnpm build
 ```
 
 // turbo
 
-### 12. コミットと CHANGELOG 更新
+### 12. Commit and Update CHANGELOG
 
 ```bash
-# コミット
+# Commit
 git add .
-git commit -m "feat([feature]): [機能の説明]"
+git commit -m "feat([feature]): [Description of feature]"
 
-# CHANGELOG 更新
-# /changelog ワークフローを実行
+# Update CHANGELOG
+# Run /changelog workflow
 ```
 
-## チェックリスト
+## Checklist
 
-- [ ] CDK Stack を作成した
-- [ ] 環境変数テンプレートを更新した
-- [ ] Next.js API を実装した
-- [ ] ユーティリティ関数を作成した
-- [ ] サンプルページを作成した
-- [ ] ドキュメントを作成した
-- [ ] README を更新した
-- [ ] ビルドが成功した
-- [ ] コミットした
-- [ ] CHANGELOG を更新した
+- [ ] Created CDK Stack
+- [ ] Updated environment variable templates
+- [ ] Implemented Next.js API
+- [ ] Created utility functions
+- [ ] Created sample page
+- [ ] Created documentation
+- [ ] Updated README
+- [ ] Build succeeded
+- [ ] Committed changes
+- [ ] Updated CHANGELOG
 
-## 参考: 既存の機能実装
+## Reference: Existing Feature Implementations
 
-| 機能 | Stack | ドキュメント |
-|-----|-------|------------|
+| Feature | Stack | Documentation |
+|---------|-------|---------------|
 | AWS SES | `infra/lib/ses-stack.ts` | `docs/20_development/ses-email-guide.md` |

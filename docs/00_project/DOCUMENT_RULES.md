@@ -1,199 +1,201 @@
-# ドキュメント管理ルール
+# Documentation Rules
 
-## 1. ドキュメント構成
+[日本語 (Japanese)](DOCUMENT_RULES.ja.md)
 
-### 1.1 ディレクトリ構造
+## 1. Documentation Structure
+
+### 1.1 Directory Structure
 
 ```plaintext
 my-monorepo/
-├── docs/                        # ドキュメントルート
-│   ├── 00_project/              # プロジェクト管理
-│   │   ├── PROJECT_PLAN.md      # プロジェクト計画書
-│   │   └── CHANGELOG.md         # 変更履歴
-│   ├── 10_design/               # 設計ドキュメント
-│   │   ├── architecture.md      # アーキテクチャ設計
-│   │   └── database.md          # DB設計（Phase 2以降）
-│   ├── 20_development/          # 開発ガイド
-│   │   ├── getting-started.md   # セットアップ手順
-│   │   ├── coding-standards.md  # コーディング規約
-│   │   └── testing-guide.md     # テストガイド
-│   ├── 30_operations/           # 運用ドキュメント
-│   │   ├── deployment.md        # デプロイ手順
-│   │   └── troubleshooting.md   # トラブルシューティング
-│   └── 99_references/           # 参考資料
-│       └── external-links.md    # 外部リンク集
-├── README.md                    # プロジェクト概要（エントリポイント）
-├── CONTRIBUTING.md              # コントリビューションガイド
-└── LICENSE                      # ライセンス
+├── docs/                        # Documentation Root
+00_project/              # Project Management
+│   │   ├── PROJECT_PLAN.md      # Project Plan
+│   │   └── CHANGELOG.md         # Changelog
+│   ├── 10_design/               # Design Documents
+│   │   ├── architecture.md      # Architecture Design
+│   │   └── database.md          # DB Design (Phase 2+)
+│   ├── 20_development/          # Development Guides
+│   │   ├── getting-started.md   # Setup Procedures
+│   │   ├── coding-standards.md  # Coding Standards
+│   │   └── testing-guide.md     # Testing Guide
+│   ├── 30_operations/           # Operations Documents
+│   │   ├── deployment.md        # Deployment Procedures
+│   │   └── troubleshooting.md   # Troubleshooting
+│   └── 99_references/           # References
+│       └── external-links.md    # External Links
+├── README.md                    # Project Overview (Entry Point)
+├── CONTRIBUTING.md              # Contributing Guide
+└── LICENSE                      # License
 ```
 
-### 1.2 番号体系
+### 1.2 Numbering System
 
-| 番号帯 | カテゴリ         | 説明                                   |
-| :----: | :--------------- | :------------------------------------- |
-| `00_`  | プロジェクト管理 | 計画書、変更履歴、議事録               |
-| `10_`  | 設計             | アーキテクチャ、API設計、DB設計        |
-| `20_`  | 開発             | セットアップ、コーディング規約、テスト |
-| `30_`  | 運用             | デプロイ、監視、障害対応               |
-| `99_`  | 参考資料         | 外部リンク、用語集                     |
+| Number Range | Category           | Description                            |
+| :----------: | :----------------- | :------------------------------------- |
+| `00_`        | Project Management | Plans, Changelogs, Minutes             |
+| `10_`        | Design             | Architecture, API Design, DB           |
+| `20_`        | Development        | Setup, Coding Standards, Testing       |
+| `30_`        | Operations         | Deployment, Monitoring, Incident Response |
+| `99_`        | References         | External Links, Glossary               |
 
 ---
 
-## 2. ドキュメント作成ルール
+## 2. Document Creation Rules
 
-### 2.1 ファイル命名規則
+### 2.1 File Naming Convention
 
-- **小文字のケバブケース** を使用: `getting-started.md`
-- **日本語ファイル名は禁止**: 文字化け防止のため
-- **バージョン番号は含めない**: Gitで履歴管理
+- Use **lower case kebab-case**: `getting-started.md`
+- **Japanese filenames are prohibited**: To prevent character encoding issues
+- **Do not include version numbers**: Manage history with Git
 
-### 2.2 必須メタ情報
+### 2.2 Required Metadata
 
-各ドキュメントの冒頭に以下を記載:
+Include the following at the beginning of each document:
 
 ```markdown
-# ドキュメントタイトル
+# Document Title
 
-> **最終更新**: 2025-12-16  
-> **作成者**: @username  
-> **ステータス**: Draft | Review | Approved
+> **Last Updated**: 2025-12-16
+> **Author**: @username
+> **Status**: Draft | Review | Approved
 ```
 
-### 2.3 Markdown スタイルガイド
+### 2.3 Markdown Style Guide
 
-| 項目           | ルール                                  |
-| :------------- | :-------------------------------------- |
-| 見出し         | `#` の後にスペース、階層は適切に        |
-| リスト         | `-` を使用（`*` は非推奨）              |
-| コードブロック | 言語指定必須 (`bash, `typescript)       |
-| リンク         | 相対パス推奨 (`./getting-started.md`)   |
-| 画像           | `docs/assets/` に配置、alt テキスト必須 |
+| Item           | Rule                                        |
+| :------------- | :------------------------------------------ |
+| Headings       | Space after `#`, proper hierarchy           |
+| Lists          | Use `-` (`*` is deprecated)                 |
+| Code Blocks    | Language specification required (`bash, `typescript) |
+| Links          | Relative path recommended (`./getting-started.md`) |
+| Images         | Place in `docs/assets/`, alt text required  |
 
 ---
 
-## 3. ドキュメント更新フロー
+## 3. Documentation Update Flow
 
-### 3.1 更新タイミング
+### 3.1 Update Timing
 
-| トリガー     | 更新内容                                 |
+| Trigger      | Update Content                           |
 | :----------- | :--------------------------------------- |
-| 機能追加     | 関連するガイド・設計書を更新             |
-| バグ修正     | 必要に応じてトラブルシューティングに追記 |
-| 設定変更     | セットアップ手順・運用手順を更新         |
-| フェーズ完了 | CHANGELOG.md に記録                      |
+| Feature Add  | Update related guides/designs            |
+| Bug Fix      | Add to troubleshooting if necessary      |
+| Config Change| Update setup/operation procedures        |
+| Phase Done   | Record in CHANGELOG.md                   |
 
-### 3.2 レビュープロセス
+### 3.2 Review Process
 
-1. ドキュメント変更は **Pull Request** で提出
-2. コードレビューと同様に **1名以上のApprove** が必要
-3. 大きな設計変更は Issue で事前議論
+1. Submit document changes via **Pull Request**
+2. Requires **Approval from 1+ person** same as code review
+3. Major design changes should be discussed in Issues beforehand
 
-### 3.3 コミットメッセージ
+### 3.3 Commit Messages
 
-ドキュメント変更時のコミットプレフィックス:
+Commit prefix for documentation changes:
 
 ```
-docs: READMEにセットアップ手順を追加
-docs(design): アーキテクチャ図を更新
-docs(fix): タイポ修正
+docs: Add setup procedure to README
+docs(design): Update architecture diagram
+docs(fix): Fix typo
 ```
 
 ---
 
-## 4. フェーズ別ドキュメント作成計画
+## 4. Documentation Plan by Phase
 
-### Phase 1: モノレポ基盤のセットアップ
+### Phase 1: Monorepo Foundation Setup
 
-- [ ] `README.md` - プロジェクト概要
-- [ ] `docs/20_development/getting-started.md` - 開発環境セットアップ
+- [ ] `README.md` - Project Overview
+- [ ] `docs/20_development/getting-started.md` - Development Environment Setup
 
-### Phase 1.5: Devcontainer 基盤構成
+### Phase 1.5: Devcontainer Foundation Configuration
 
-- [ ] `docs/20_development/devcontainer-guide.md` - Devcontainer利用ガイド
+- [ ] `docs/20_development/devcontainer-guide.md` - Devcontainer Usage Guide
 
-### Phase 2: Next.js アプリケーションの実装
+### Phase 2: Next.js Application Implementation
 
-- [ ] `docs/20_development/coding-standards.md` - コーディング規約
-- [ ] `docs/10_design/architecture.md` - アーキテクチャ設計
+- [ ] `docs/20_development/coding-standards.md` - Coding Standards
+- [ ] `docs/10_design/architecture.md` - Architecture Design
 
-### Phase 3: IaCによるAmplify環境構築
+### Phase 3: Amplify Environment Construction via IaC
 
-- [ ] `docs/10_design/infrastructure.md` - インフラ設計
-- [ ] `docs/30_operations/deployment.md` - デプロイ手順
+- [ ] `docs/10_design/infrastructure.md` - Infrastructure Design
+- [ ] `docs/30_operations/deployment.md` - Deployment Procedures
 
-### Phase 4: CI/CDパイプラインの構築
+### Phase 4: CI/CD Pipeline Construction
 
-- [ ] `docs/30_operations/ci-cd.md` - CI/CDパイプライン説明
+- [ ] `docs/30_operations/ci-cd.md` - CI/CD Pipeline Description
 
-### Phase 5: ドキュメント整備と公開
+### Phase 5: Documentation and Release
 
-- [ ] 全ドキュメントの最終レビュー
-- [ ] `CONTRIBUTING.md` - コントリビューションガイド
-- [ ] `LICENSE` - ライセンスファイル
+- [ ] Final review of all documents
+- [ ] `CONTRIBUTING.md` - Contributing Guide
+- [ ] `LICENSE` - License File
 
 ---
 
-## 5. テンプレート
+## 5. Templates
 
-### 5.1 新規ドキュメントテンプレート
+### 5.1 New Document Template
 
 ```markdown
-# [ドキュメントタイトル]
+# [Document Title]
 
-> **最終更新**: YYYY-MM-DD  
-> **作成者**: @username  
-> **ステータス**: Draft
+> **Last Updated**: YYYY-MM-DD
+> **Author**: @username
+> **Status**: Draft
 
-## 概要
+## Overview
 
-[このドキュメントの目的を1-2文で説明]
+[Explain the purpose of this document in 1-2 sentences]
 
-## 目次
+## Table of Contents
 
-- [セクション1](#セクション1)
-- [セクション2](#セクション2)
-
----
-
-## セクション1
-
-[内容]
-
-## セクション2
-
-[内容]
+- [Section 1](#section-1)
+- [Section 2](#section-2)
 
 ---
 
-## 関連ドキュメント
+## Section 1
 
-- [関連ドキュメント名](./path-to-doc.md)
+[Content]
+
+## Section 2
+
+[Content]
+
+---
+
+## Related Documents
+
+- [Related Document Name](./path-to-doc.md)
 ```
 
 ---
 
-## 6. ツール連携
+## 6. Tool Integration
 
-### 6.1 推奨ツール
+### 6.1 Recommended Tools
 
-| 用途                   | ツール                           |
+| Usage                  | Tool                             |
 | :--------------------- | :------------------------------- |
-| ドキュメントプレビュー | VS Code + Markdown Preview       |
-| 図表作成               | Mermaid (Markdownに埋め込み)     |
-| スペルチェック         | Code Spell Checker (VS Code拡張) |
+| Document Preview       | VS Code + Markdown Preview       |
+| Diagramming            | Mermaid (Embedded in Markdown)   |
+| Spell Check            | Code Spell Checker (VS Code Ext) |
 
-### 6.2 Mermaid 図の活用
+### 6.2 Using Mermaid Diagrams
 
-アーキテクチャ図やフロー図は Mermaid で記述:
+Describe architecture and flow diagrams using Mermaid:
 
 ```mermaid
 graph LR
-    A[開発者] --> B[ドキュメント作成]
-    B --> C[PR作成]
-    C --> D[レビュー]
-    D --> E[マージ]
+    A[Developer] --> B[Create Doc]
+    B --> C[Create PR]
+    C --> D[Review]
+    D --> E[Merge]
 ```
 
 ---
 
-_このドキュメント管理ルールは、プロジェクトの成長に応じて更新されます。_
+_This documentation rule will be updated as the project grows._

@@ -1,217 +1,217 @@
 # Next.js Amplify Starter Kit
 
+[日本語 (Japanese)](README.ja.md)
+
 [![CI](https://github.com/i-Willink-Inc/next-amplify-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/i-Willink-Inc/next-amplify-starter-kit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-モダンな Web 開発のベストプラクティスを集約したスターターキットです。Next.js + AWS Amplify + CDK によるモノレポ構成で、最速で Web サイトを立ち上げ、かつスケーラブルな基盤を提供します。
+A starter kit aggregating modern web development best practices. Features a monorepo structure with Next.js + AWS Amplify + CDK to launch web sites fastest and provide a scalable foundation.
 
 ---
 
-## 📋 目次
+## 📋 Table of Contents
 
-- [特徴](#-特徴)
-- [プロジェクト構成](#-プロジェクト構成)
-- [クイックスタート](#-クイックスタート)
-- [AWS へのデプロイ](#-aws-へのデプロイ)
-- [必要な環境変数・シークレット](#-必要な環境変数シークレット)
-- [利用可能なコマンド](#-利用可能なコマンド)
-- [ドキュメント](#-ドキュメント)
-
----
-
-## ✨ 特徴
-
-| 技術 | 説明 |
-|------|------|
-| 🚀 **Turborepo** | 高速なビルドキャッシュとモノレポ管理 |
-| ⚡ **Next.js 15** | App Router + React 19 + SSR対応 |
-| ☁️ **AWS CDK** | Infrastructure as Code で再現性を担保 |
-| 📧 **AWS SES** | メール送信機能（問い合わせフォーム対応） |
-| 🎨 **Tailwind CSS** | ユーティリティファーストなスタイリング |
-| 🔄 **GitHub Actions** | CI/CD パイプライン完備 |
-| 📦 **pnpm** | 高速で効率的なパッケージ管理 |
-| 🐳 **Devcontainer** | 統一された開発環境 |
+- [Features](#-features)
+- [Project Structure](#-project-structure)
+- [Quick Start](#-quick-start)
+- [Deploy to AWS](#-deploy-to-aws)
+- [Required Environment Variables & Secrets](#-required-environment-variables--secrets)
+- [Available Commands](#-available-commands)
+- [Documentation](#-documentation)
 
 ---
 
-## 📁 プロジェクト構成
+## ✨ Features
+
+| Technology | Description |
+|------------|-------------|
+| 🚀 **Turborepo** | High-performance build system and monorepo management |
+| ⚡ **Next.js 15** | App Router + React 19 + SSR support |
+| ☁️ **AWS CDK** | Infrastructure as Code for reproducibility |
+| 🎨 **Tailwind CSS** | Utility-first styling |
+| 🔄 **GitHub Actions** | Complete CI/CD pipeline |
+| 📦 **pnpm** | Fast and efficient package management |
+| 🐳 **Devcontainer** | Consistent development environment |
+
+---
+
+## 📁 Project Structure
 
 ```
 next-amplify-starter-kit/
 ├── apps/
-│   └── web/                 # Next.js アプリケーション
+│   └── web/                 # Next.js Application
 ├── packages/
-│   ├── tsconfig/            # 共有 TypeScript 設定
-│   └── eslint-config/       # 共有 ESLint 設定
-├── infra/                   # AWS CDK インフラコード
-├── docs/                    # ドキュメント
-│   ├── 00_project/          # プロジェクト管理
-│   ├── 20_development/      # 開発ガイド
-│   └── 30_operations/       # 運用ガイド
-└── .github/workflows/       # CI/CD 定義
+│   ├── tsconfig/            # Shared TypeScript Config
+│   └── eslint-config/       # Shared ESLint Config
+├── infra/                   # AWS CDK Infrastructure Code
+├── docs/                    # Documentation
+│   ├── 00_project/          # Project Management
+│   ├── 20_development/      # Development Guide
+│   └── 30_operations/       # Operations Guide
+└── .github/workflows/       # CI/CD Definitions
 ```
 
 ---
 
-## 🚀 クイックスタート
+## 🚀 Quick Start
 
-### 前提条件
+### Prerequisites
 
-| ツール | 最小バージョン | 推奨 |
-|--------|--------------|------|
+| Tool | Minimum Version | Recommended |
+|------|-----------------|-------------|
 | Node.js | 18.17.0 | 20.x LTS |
 | pnpm | 8.0.0 | 9.x |
-| Docker | - | 最新版（Devcontainer使用時） |
+| Docker | - | Latest (When using Devcontainer) |
 
-### 1. リポジトリのクローン
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/i-Willink-Inc/next-amplify-starter-kit.git
 cd next-amplify-starter-kit
 ```
 
-### 2. 依存関係のインストール
+### 2. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 3. 開発サーバーの起動
+### 3. Start Development Server
 
 ```bash
 pnpm dev
 ```
 
-http://localhost:3000 でアプリケーションにアクセスできます。
+Access the application at http://localhost:3000.
 
-### Devcontainer を使用する場合（推奨）
+### Using Devcontainer (Recommended)
 
-1. Docker Desktop または Rancher Desktop を起動
-2. VS Code でプロジェクトを開く
-3. コマンドパレット (Ctrl+Shift+P) → **「Dev Containers: Reopen in Container」**
+1. Start Docker Desktop or Rancher Desktop.
+2. Open the project in VS Code.
+3. Command Palette (Ctrl+Shift+P) → **"Dev Containers: Reopen in Container"**
 
-> **Note**: Docker context の設定については [Devcontainer 利用ガイド](docs/20_development/devcontainer-guide.md) を参照してください。
+> **Note**: For Docker context settings, please refer to the [Devcontainer Guide](docs/20_development/devcontainer-guide.md).
 
 ---
 
-## ☁️ AWS へのデプロイ
+## ☁️ Deploy to AWS
 
-### デプロイフロー
+### Deploy Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Step 1: CDKデプロイ（ローカル or GitHub Actions）               │
-│          → AWS 上に Amplify サービスを作成                       │
-│          → GitHub リポジトリと連携設定                           │
+│  Step 1: CDK Deploy (Local or GitHub Actions)                   │
+│          → Create Amplify service on AWS                        │
+│          → Set up GitHub repository connection                  │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│  Step 2: main ブランチにマージ                                   │
-│          → Amplify が変更を自動検知                              │
-│          → amplify.yml に従ってビルド・デプロイ                  │
+│  Step 2: Merge to main branch                                   │
+│          → Amplify automatically detects changes                │
+│          → Build and deploy according to amplify.yml            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### パターン1: ローカルからのデプロイ（初回セットアップ推奨）
+### Pattern 1: Deploy from Local (Recommended for Initial Setup)
 
-`.env` ファイルを使用して簡単にデプロイできます。
+Easy deployment using `.env` file.
 
 ```bash
-# 1. 環境変数の設定
+# 1. Setup Environment Variables
 cp infra/.env.example infra/.env
-# infra/.env を編集して AWS認証情報 と GITHUB_TOKEN を設定
+# Edit infra/.env to set AWS credentials and GITHUB_TOKEN
 
-# 2. CDK デプロイ
+# 2. CDK Deploy
 cd infra
 npx cdk deploy
 ```
 
-### パターン2: GitHub Actions からの自動デプロイ
+### Pattern 2: Auto Deploy from GitHub Actions
 
-1. GitHub Secrets に認証情報を設定（下記参照）
-2. `infra/` 配下のファイルを変更して `main` にマージ
-3. GitHub Actions が自動で CDK デプロイを実行
+1. Set credentials in GitHub Secrets (see below).
+2. Modify files under `infra/` and merge to `main`.
+3. GitHub Actions automatically executes CDK deploy.
 
-詳細な手順は [デプロイ手順書](docs/30_operations/deployment.md) を参照してください。
+For detailed instructions, refer to the [Deployment Guide](docs/30_operations/deployment.md).
 
 ---
 
-## 🔐 必要な環境変数・シークレット
+## 🔐 Required Environment Variables & Secrets
 
-### AWS Secrets Manager（必須）
+### AWS Secrets Manager (Required)
 
-| シークレット名 | 値 | 説明 |
-|--------------|-----|------|
+| Secret Name | Value | Description |
+|-------------|-------|-------------|
 | `github/amplify-token` | `ghp_xxxxxxxx` | GitHub Personal Access Token |
 
-**GitHub PAT に必要なスコープ:**
-- `repo` - リポジトリへのフルアクセス
-- `admin:repo_hook` - Webhook 設定用
+**Required GitHub PAT Scopes:**
+- `repo` - Full control of private repositories
+- `admin:repo_hook` - Full control of repository hooks
 
-### ローカル環境変数（パターン1使用時）
+### Local Environment Variables (For Pattern 1)
 
-| 環境変数 | 値の例 | 説明 |
-|---------|-------|------|
-| `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` | IAM アクセスキー ID |
-| `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` | IAM シークレットアクセスキー |
-| `AWS_DEFAULT_REGION` | `ap-northeast-1` | デフォルトリージョン |
+| Environment Variable | Example | Description |
+|----------------------|---------|-------------|
+| `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` | IAM Access Key ID |
+| `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` | IAM Secret Access Key |
+| `AWS_DEFAULT_REGION` | `ap-northeast-1` | Default Region |
 
-### GitHub Secrets（パターン2使用時）
+### GitHub Secrets (For Pattern 2)
 
-#### 方式A: OIDC認証（推奨）
+#### Method A: OIDC Authentication (Recommended)
 
-| Secret 名 | 値の例 |
-|----------|-------|
+| Secret Name | Example |
+|-------------|---------|
 | `AWS_ROLE_ARN` | `arn:aws:iam::123456789012:role/GitHubActionsRole` |
 
-#### 方式B: アクセスキー認証
+#### Method B: Access Key Authentication
 
-| Secret 名 | 値の例 |
-|----------|-------|
+| Secret Name | Example |
+|-------------|---------|
 | `AWS_ACCESS_KEY_ID` | `AKIAXXXXXXXX` |
 | `AWS_SECRET_ACCESS_KEY` | `xxxxxxxx` |
 
 ---
 
-## 📋 利用可能なコマンド
+## 📋 Available Commands
 
-| コマンド | 説明 |
-|---------|------|
-| `pnpm dev` | 開発サーバー起動 |
-| `pnpm build` | プロダクションビルド |
-| `pnpm lint` | ESLint 実行 |
-| `pnpm format` | Prettier でフォーマット |
-| `pnpm test` | テスト実行 |
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm format` | Format with Prettier |
+| `pnpm test` | Run tests |
 
-### CDK コマンド（infra/）
+### CDK Commands (infra/)
 
-| コマンド | 説明 |
-|---------|------|
-| `npx cdk diff` | 変更内容を確認 |
-| `npx cdk deploy` | スタックをデプロイ |
-| `npx cdk synth` | CloudFormation テンプレート生成 |
-
----
-
-## 📚 ドキュメント
-
-| ドキュメント | 対象者 | 説明 |
-|------------|-------|------|
-| [プロジェクト計画書](docs/00_project/PROJECT_PLAN.md) | 全員 | プロジェクトの概要と計画 |
-| [ドキュメント管理ルール](docs/00_project/DOCUMENT_RULES.md) | 開発者 | ドキュメントの書き方 |
-| [開発環境セットアップ](docs/20_development/getting-started.md) | 開発者 | 開発環境の構築手順 |
-| [Devcontainer 利用ガイド](docs/20_development/devcontainer-guide.md) | 開発者 | Docker開発環境の利用方法 |
-| [SES メール機能ガイド](docs/20_development/ses-email-guide.md) | 開発者 | メール送信機能の使い方 |
-| [デプロイ手順書](docs/30_operations/deployment.md) | 運用者 | AWS へのデプロイ手順 |
+| Command | Description |
+|---------|-------------|
+| `npx cdk diff` | Compare stack with deployed version |
+| `npx cdk deploy` | Deploy stack |
+| `npx cdk synth` | Generate CloudFormation template |
 
 ---
 
-## 🤝 コントリビューション
+## 📚 Documentation
 
-コントリビューションを歓迎します！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+| Document | Target | Description |
+|----------|--------|-------------|
+| [Project Plan](docs/00_project/PROJECT_PLAN.md) | All | Project overview and plan |
+| [Documentation Rules](docs/00_project/DOCUMENT_RULES.md) | Developers | How to write documentation |
+| [Getting Started](docs/20_development/getting-started.md) | Developers | Setting up development environment |
+| [Devcontainer Guide](docs/20_development/devcontainer-guide.md) | Developers | How to use Docker dev environment |
+| [Deployment Guide](docs/30_operations/deployment.md) | Operators | AWS deployment instructions |
 
 ---
 
-## 📄 ライセンス
+## 🤝 Contribution
 
-このプロジェクトは [MIT License](LICENSE) の下で公開されています。
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).

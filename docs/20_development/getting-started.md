@@ -1,79 +1,81 @@
-# 開発環境セットアップ
+# Development Environment Setup
 
-> **最終更新**: 2025-12-16  
-> **ステータス**: Approved
+[日本語 (Japanese)](getting-started.ja.md)
 
-## 概要
+> **Last Updated**: 2025-12-16
+> **Status**: Approved
 
-このガイドでは、Next.js Amplify Starter Kit の開発環境をセットアップする手順を説明します。
+## Overview
 
-## 前提条件
+This guide explains how to set up the development environment for Next.js Amplify Starter Kit.
 
-| ツール | 最小バージョン | 推奨 |
-|--------|--------------|------|
+## Prerequisites
+
+| Tool | Minimum Version | Recommended |
+|------|-----------------|-------------|
 | Node.js | 18.17.0 | 20.x LTS |
 | pnpm | 8.0.0 | 9.x |
-| Git | 2.30.0 | 最新版 |
+| Git | 2.30.0 | Latest |
 
-## セットアップ手順
+## Setup Procedures
 
-### 1. リポジトリのクローン
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/i-Willink-Inc/next-amplify-starter-kit.git
 cd next-amplify-starter-kit
 ```
 
-### 2. 依存関係のインストール
+### 2. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 3. 開発サーバーの起動
+### 3. Start Development Server
 
 ```bash
 pnpm dev
 ```
 
-http://localhost:3000 でアプリケーションにアクセスできます。
+You can access the application at http://localhost:3000.
 
-## ビルド
+## Build
 
 ```bash
 pnpm build
 ```
 
-## コード品質チェック
+## Code Quality Check
 
 ```bash
 # Lint
 pnpm lint
 
-# フォーマット
+# Format
 pnpm format
 ```
 
-## Devcontainer（オプション）
+## Devcontainer (Optional)
 
-Docker を使用して統一された開発環境を利用できます。
+You can use a unified development environment using Docker.
 
-1. Docker Desktop または Rancher Desktop を起動
-2. VS Code でプロジェクトを開く
-3. コマンドパレット (Ctrl+Shift+P) → **「Dev Containers: Reopen in Container」**
+1. Start Docker Desktop or Rancher Desktop
+2. Open the project in VS Code
+3. Command Palette (Ctrl+Shift+P) → **"Dev Containers: Reopen in Container"**
 
-詳細は [devcontainer-guide.md](./devcontainer-guide.md) を参照してください。
+For details, refer to [devcontainer-guide.md](./devcontainer-guide.md).
 
-## インフラストラクチャ (AWS CDK)
+## Infrastructure (AWS CDK)
 
-このプロジェクトは AWS CDK を使用してインフラを管理しています。
-`infra/` ディレクトリに CDK のコードが含まれています。
+This project manages infrastructure using AWS CDK.
+CDK code is included in the `infra/` directory.
 
-AWS へのデプロイやインフラ構成については、以下を参照してください：
-- [デプロイ手順書](../30_operations/deployment.md)
-- [README.md - AWS へのデプロイ](../../README.md#aws-へのデプロイ)
+For AWS deployment and infrastructure configuration, refer to:
+- [Deployment Guide](../30_operations/deployment.md)
+- [README.md - Deploy to AWS](../../README.md#deploy-to-aws)
 
-## 次のステップ
+## Next Steps
 
-- [ドキュメント管理ルール](../00_project/DOCUMENT_RULES.md)
-- [プロジェクト計画書](../00_project/PROJECT_PLAN.md)
+- [Documentation Rules](../00_project/DOCUMENT_RULES.md)
+- [Project Plan](../00_project/PROJECT_PLAN.md)
