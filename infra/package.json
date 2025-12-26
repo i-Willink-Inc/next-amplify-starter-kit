@@ -18,7 +18,7 @@
     "devDependencies": {
         "@repo/tsconfig": "workspace:*",
         "@types/node": "^25.0.3",
-        "aws-cdk": "^2.173.4",
+        "aws-cdk": "^2.1100.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.7.2"
     }
