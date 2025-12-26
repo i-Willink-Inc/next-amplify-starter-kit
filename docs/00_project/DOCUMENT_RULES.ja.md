@@ -137,7 +137,7 @@ docs(fix): タイポ修正
 | 図表作成               | Mermaid (Markdownに埋め込み)     |
 | スペルチェック         | Code Spell Checker (VS Code拡張) |
 
-### 6.2 Mermaid 図の活用
+### 5.2 Mermaid 図の活用
 
 アーキテクチャ図やフロー図は Mermaid で記述:
 
