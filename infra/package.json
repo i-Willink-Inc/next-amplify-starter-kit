@@ -10,7 +10,7 @@
         "diff": "cdk diff"
     },
     "dependencies": {
-        "aws-cdk-lib": "^2.173.4",
+        "aws-cdk-lib": "^2.233.0",
         "constructs": "^10.4.2",
         "dotenv": "^17.2.3",
         "source-map-support": "^0.5.21"
