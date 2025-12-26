@@ -134,6 +134,121 @@ describe('SES Client', () => {
             expect(result.success).toBe(false);
             expect(result.error).toContain('SES_FROM_EMAIL');
         });
+        it('should handle cc, bcc and replyTo', async () => {
+            const mockSend = vi.fn().mockResolvedValue({
+                MessageId: 'test-message-id',
+            });
+
+            vi.doMock('@aws-sdk/client-ses', () => ({
+                SESClient: vi.fn().mockImplementation(function() {
+                    return { send: mockSend };
+                }),
+                SendEmailCommand: vi.fn(),
+            }));
+
+            vi.resetModules();
+            const { sendEmail } = await import('@/lib/ses-client');
+
+            await sendEmail({
+                to: 'to@example.com',
+                subject: 'Test',
+                body: 'Body',
+                cc: 'cc@example.com',
+                bcc: ['bcc1@example.com', 'bcc2@example.com'],
+                replyTo: 'reply@example.com',
+            });
+
+            const { SendEmailCommand } = await import('@aws-sdk/client-ses');
+            expect(SendEmailCommand).toHaveBeenCalledWith(expect.objectContaining({
+                Destination: {
+                    ToAddresses: ['to@example.com'],
+                    CcAddresses: ['cc@example.com'],
+                    BccAddresses: ['bcc1@example.com', 'bcc2@example.com'],
+                },
+                ReplyToAddresses: ['reply@example.com'],
+            }));
+        });
+
+        it('should handle MessageRejected error', async () => {
+            const error = new Error('Message Rejected');
+            error.name = 'MessageRejected';
+            const mockSend = vi.fn().mockRejectedValue(error);
+
+            vi.doMock('@aws-sdk/client-ses', () => ({
+                SESClient: vi.fn().mockImplementation(function() {
+                    return { send: mockSend };
+                }),
+                SendEmailCommand: vi.fn(),
+            }));
+
+            vi.resetModules();
+            const { sendEmail } = await import('@/lib/ses-client');
+
+            const result = await sendEmail({
+                to: 'recipient@example.com',
+                subject: 'Test',
+                body: 'Body',
+            });
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain('Email was rejected');
+        });
+
+        it('should handle MailFromDomainNotVerifiedException', async () => {
+            const error = new Error('Domain not verified');
+            error.name = 'MailFromDomainNotVerifiedException';
+            const mockSend = vi.fn().mockRejectedValue(error);
+
+            vi.doMock('@aws-sdk/client-ses', () => ({
+                SESClient: vi.fn().mockImplementation(function() {
+                    return { send: mockSend };
+                }),
+                SendEmailCommand: vi.fn(),
+            }));
+
+            vi.resetModules();
+            const { sendEmail } = await import('@/lib/ses-client');
+
+            const result = await sendEmail({
+                to: 'recipient@example.com',
+                subject: 'Test',
+                body: 'Body',
+            });
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain('sender domain is not verified');
+        });
+    });
+
+    describe('HTML Escaping', () => {
+        it('should escape HTML characters in contact email', async () => {
+            const mockSend = vi.fn().mockResolvedValue({
+                MessageId: 'id',
+            });
+
+            vi.doMock('@aws-sdk/client-ses', () => ({
+                SESClient: vi.fn().mockImplementation(function() {
+                    return { send: mockSend };
+                }),
+                SendEmailCommand: vi.fn(),
+            }));
+
+            vi.resetModules();
+            const { sendContactEmail } = await import('@/lib/ses-client');
+
+            await sendContactEmail({
+                name: '<b>Bold</b>',
+                email: 'test@example.com',
+                message: '<script>alert("xss")</script>',
+            });
+
+            const { SendEmailCommand } = await import('@aws-sdk/client-ses');
+            const callArgs = vi.mocked(SendEmailCommand).mock.calls[0][0];
+            const htmlBody = callArgs.Message?.Body?.Html?.Data || '';
+
+            expect(htmlBody).toContain('&lt;b&gt;Bold&lt;/b&gt;');
+            expect(htmlBody).toContain('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+        });
     });
 
     describe('sendContactEmail', () => {
