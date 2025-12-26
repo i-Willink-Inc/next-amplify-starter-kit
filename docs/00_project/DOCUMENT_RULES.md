@@ -48,19 +48,8 @@ my-monorepo/
 - **Japanese filenames are prohibited**: To prevent character encoding issues
 - **Do not include version numbers**: Manage history with Git
 
-### 2.2 Recommended Metadata
 
-Include the following at the beginning of each document (Optional: `Author` can be omitted as it's tracked by Git):
-
-```markdown
-# Document Title
-
-> **Last Updated**: 2025-12-16
-> **Author**: @username
-> **Status**: Draft | Review | Approved
-```
-
-### 2.3 Markdown Style Guide
+### 2.2 Markdown Style Guide
 
 | Item           | Rule                                        |
 | :------------- | :------------------------------------------ |
@@ -109,9 +98,6 @@ docs(fix): Fix typo
 ```markdown
 # [Document Title]
 
-> **Last Updated**: YYYY-MM-DD
-> **Author**: @username
-> **Status**: Draft
 
 ## Overview
 

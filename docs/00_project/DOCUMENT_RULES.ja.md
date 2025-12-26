@@ -48,19 +48,8 @@ my-monorepo/
 - **日本語ファイル名は禁止**: 文字化け防止のため
 - **バージョン番号は含めない**: Gitで履歴管理
 
-### 2.2 必須メタ情報
 
-各ドキュメントの冒頭に以下を記載:
-
-```markdown
-# ドキュメントタイトル
-
-> **最終更新**: 2025-12-16  
-> **作成者**: @username  
-> **ステータス**: Draft | Review | Approved
-```
-
-### 2.3 Markdown スタイルガイド
+### 2.2 Markdown スタイルガイド
 
 | 項目           | ルール                                  |
 | :------------- | :-------------------------------------- |
@@ -101,49 +90,14 @@ docs(fix): タイポ修正
 
 ---
 
-## 4. フェーズ別ドキュメント作成計画
 
-### Phase 1: モノレポ基盤のセットアップ
+## 4. テンプレート
 
-- [ ] `README.md` - プロジェクト概要
-- [ ] `docs/20_development/getting-started.md` - 開発環境セットアップ
-
-### Phase 1.5: Devcontainer 基盤構成
-
-- [ ] `docs/20_development/devcontainer-guide.md` - Devcontainer利用ガイド
-
-### Phase 2: Next.js アプリケーションの実装
-
-- [ ] `docs/20_development/coding-standards.md` - コーディング規約
-- [ ] `docs/10_design/architecture.md` - アーキテクチャ設計
-
-### Phase 3: IaCによるAmplify環境構築
-
-- [ ] `docs/10_design/infrastructure.md` - インフラ設計
-- [ ] `docs/30_operations/deployment.md` - デプロイ手順
-
-### Phase 4: CI/CDパイプラインの構築
-
-- [ ] `docs/30_operations/ci-cd.md` - CI/CDパイプライン説明
-
-### Phase 5: ドキュメント整備と公開
-
-- [ ] 全ドキュメントの最終レビュー
-- [ ] `CONTRIBUTING.md` - コントリビューションガイド
-- [ ] `LICENSE` - ライセンスファイル
-
----
-
-## 5. テンプレート
-
-### 5.1 新規ドキュメントテンプレート
+### 4.1 新規ドキュメントテンプレート
 
 ```markdown
 # [ドキュメントタイトル]
 
-> **最終更新**: YYYY-MM-DD  
-> **作成者**: @username  
-> **ステータス**: Draft
 
 ## 概要
 
@@ -173,9 +127,9 @@ docs(fix): タイポ修正
 
 ---
 
-## 6. ツール連携
+## 5. ツール連携
 
-### 6.1 推奨ツール
+### 5.1 推奨ツール
 
 | 用途                   | ツール                           |
 | :--------------------- | :------------------------------- |
