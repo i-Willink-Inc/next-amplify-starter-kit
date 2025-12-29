@@ -11,7 +11,20 @@ import { SesStack } from '../lib/ses-stack';
 const app = new cdk.App();
 
 // Amplify Hosting Stack
-new AmplifyStack(app, 'NextAmplifyStarterKit', {
+// Amplify Hosting Stack
+const appName = process.env.AMPLIFY_APP_NAME;
+
+if (!appName) {
+    throw new Error('AMPLIFY_APP_NAME environment variable is required.');
+}
+
+// Convert app-name-case to PascalCase for CloudFormation Stack Name (e.g., next-amplify-starter-kit -> NextAmplifyStarterKit)
+const stackName = appName
+    .split(/[^a-zA-Z0-9]/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+
+new AmplifyStack(app, stackName, {
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEFAULT_REGION || 'ap-northeast-1',
