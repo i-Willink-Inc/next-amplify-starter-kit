@@ -8,7 +8,8 @@
 ## Overview
 
 This project uses AWS Amplify to host the Next.js application.
-It supports two deployment methods: **Manual from Local** and **Automatic from GitHub Actions**.
+It supports two dDeployment logic supports both **Manual from Local** and **Automated from GitHub Actions**.
+For detailed pipeline specifications, please refer to [CI/CD Pipeline Specification](ci-cd-pipeline.md).
 
 ---
 
@@ -139,8 +140,8 @@ Or:
 ### 2.2 Workflow Trigger
 
 - **Auto**: When changes in `infra/` or `amplify.yml` are merged to `main`
-- **Manual**: Actions → Deploy Infrastructure → Run workflow
-  - `use_secrets_manager`: `true` (Recommended) or `false` (Cost Reduction)
+- **Manual**: Actions → **CI** → Run workflow
+  - `target`: Select `infra` or `all`Reduction)
 
 ---
 
