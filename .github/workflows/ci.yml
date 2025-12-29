@@ -151,20 +151,23 @@ jobs:
     needs: lint
     if: ${{ needs.changes.outputs.infra == 'true' }}
     env:
-      REPO_NAME: ${{ secrets.REPO_NAME }}
-      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+      REPO_NAME: ${{ secrets.REPO_NAME || 'check-repo' }}
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME || 'check-app' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 20
+          cache: 'pnpm'
 
-      - name: Install CDK Dependencies
-        working-directory: infra
-        run: npm ci
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: CDK Synth
         working-directory: infra
@@ -185,14 +188,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 20
+          cache: 'pnpm'
 
-      - name: Install CDK Dependencies
-        working-directory: infra
-        run: npm ci
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Create Dummy amplify.yml if missing
         run: |
