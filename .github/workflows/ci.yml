@@ -79,6 +79,7 @@ jobs:
           
           if [ "$APPS_CHANGED" == "true" ] || [ "$INFRA_CHANGED" == "true" ]; then
             MISSING_VARS=""
+            MISSING_OPTIONAL_VARS=""
             
             # Always required
             if [ -z "$REPO_NAME" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }REPO_NAME"; fi
@@ -89,10 +90,16 @@ jobs:
               if [ -z "$AWS_ACCESS_KEY_ID" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }AWS_ACCESS_KEY_ID"; fi
               if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }AWS_SECRET_ACCESS_KEY"; fi
               if [ -z "$GH_PAT" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }GH_PAT"; fi
-              # DOMAIN_NAME is checked as requested, assuming it is required for this project
-              if [ -z "$DOMAIN_NAME" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }DOMAIN_NAME"; fi
+              
+              # Optional Variables (Warning only)
+              if [ -z "$DOMAIN_NAME" ]; then MISSING_OPTIONAL_VARS="${MISSING_OPTIONAL_VARS:+$MISSING_OPTIONAL_VARS, }DOMAIN_NAME"; fi
             fi
             
+            if [ ! -z "$MISSING_OPTIONAL_VARS" ]; then
+              echo "::warning::Missing optional environment variables: $MISSING_OPTIONAL_VARS"
+              echo "Some features (e.g. custom domain) may not work without these variables."
+            fi
+
             if [ ! -z "$MISSING_VARS" ]; then
               echo "::error::Missing required environment variables: $MISSING_VARS"
               echo "Please set these variables in GitHub Secrets."
