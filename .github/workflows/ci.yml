@@ -245,15 +245,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Dummy amplify.yml if missing
-        run: |
-          if [ ! -f amplify.yml ]; then
-            echo "version: 1" > amplify.yml
-          fi
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        id: creds
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
 
       - name: CDK Deploy
         working-directory: infra
-        run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ steps.creds.outputs.aws-account-id }}
+          CDK_DEFAULT_REGION: 'ap-northeast-1'
+        run: pnpm cdk deploy --require-approval never --outputs-file cdk-outputs.json
 
       - name: Upload CDK Outputs
         uses: actions/upload-artifact@v6
