@@ -120,7 +120,7 @@ export class AmplifyStack extends cdk.Stack {
         this.mainBranch = new amplify.CfnBranch(this, 'MainBranch', {
             appId: this.amplifyApp.attrAppId,
             branchName: 'main',
-            enableAutoBuild: true,
+            enableAutoBuild: false,
             stage: 'PRODUCTION',
             framework: 'Next.js - SSR',
         });
