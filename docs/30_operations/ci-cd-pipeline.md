@@ -30,19 +30,19 @@ graph TD
     Detect -->|"articles/**, books/**"| FlowZenn[Zenn Flow]
 
     subgraph "Apps Flow"
-        FlowApps --> Lint[Lint & Type Check]
-        FlowApps --> Test[Unit Test]
-        FlowApps --> Build[Build App]
-        Build --> DeployApp[Deploy App (Amplify)]
+        FlowApps --> Lint["Lint & Type Check"]
+        FlowApps --> Test["Unit Test"]
+        FlowApps --> Build["Build App"]
+        Build --> DeployApp["Deploy App (Amplify)"]
     end
 
     subgraph "Infra Flow"
-        FlowInfra --> CDKCheck[CDK Check]
-        CDKCheck --> DeployInfra[Deploy Infra (CDK)]
+        FlowInfra --> CDKCheck["CDK Check"]
+        CDKCheck --> DeployInfra["Deploy Infra (CDK)"]
     end
 
     subgraph "Zenn Flow"
-        FlowZenn --> SyncZenn[Sync Zenn Content]
+        FlowZenn --> SyncZenn["Sync Zenn Content"]
     end
 
     %% Dependencies
