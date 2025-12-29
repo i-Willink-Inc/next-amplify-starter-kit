@@ -62,6 +62,26 @@ jobs:
             echo "infra=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check Environment Variables
+        env:
+          REPO_NAME: ${{ secrets.REPO_NAME }}
+          AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+        run: |
+          APPS_CHANGED="${{ steps.filter.outputs.apps }}"
+          INFRA_CHANGED="${{ steps.filter.outputs.infra }}"
+          
+          if [ "$APPS_CHANGED" == "true" ] || [ "$INFRA_CHANGED" == "true" ]; then
+            MISSING_VARS=""
+            if [ -z "$REPO_NAME" ]; then MISSING_VARS="$MISSING_VARS REPO_NAME"; fi
+            if [ -z "$AMPLIFY_APP_NAME" ]; then MISSING_VARS="$MISSING_VARS AMPLIFY_APP_NAME"; fi
+            
+            if [ ! -z "$MISSING_VARS" ]; then
+              echo "::error::Missing required environment variables:$MISSING_VARS"
+              echo "Please set these variables in GitHub Secrets."
+              exit 1
+            fi
+          fi
+
   lint:
     name: Lint & Type Check
     runs-on: ubuntu-latest
