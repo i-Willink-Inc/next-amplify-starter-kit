@@ -151,8 +151,8 @@ jobs:
     needs: lint
     if: ${{ needs.changes.outputs.infra == 'true' }}
     env:
-      REPO_NAME: ${{ secrets.REPO_NAME || 'check-repo' }}
-      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME || 'check-app' }}
+      REPO_NAME: ${{ secrets.REPO_NAME }}
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
