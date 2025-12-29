@@ -12,7 +12,12 @@ const app = new cdk.App();
 
 // Amplify Hosting Stack
 // Amplify Hosting Stack
-const appName = process.env.AMPLIFY_APP_NAME || 'NextAmplifyStarterKit';
+const appName = process.env.AMPLIFY_APP_NAME;
+
+if (!appName) {
+    throw new Error('AMPLIFY_APP_NAME environment variable is required.');
+}
+
 // Convert app-name-case to PascalCase for CloudFormation Stack Name (e.g., next-amplify-starter-kit -> NextAmplifyStarterKit)
 const stackName = appName
     .split(/[^a-zA-Z0-9]/)
