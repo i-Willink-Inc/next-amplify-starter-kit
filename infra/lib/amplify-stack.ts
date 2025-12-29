@@ -62,15 +62,21 @@ export class AmplifyStack extends cdk.Stack {
             process.env.REPO_OWNER ||
             'i-Willink-Inc';
         const repoName =
-            props?.repositoryName ||
-            this.node.tryGetContext('repositoryName') ||
-            process.env.REPO_NAME ||
-            'next-amplify-starter-kit';
+            props?.repositoryName || this.node.tryGetContext('repositoryName') || process.env.REPO_NAME;
 
-        const appName = 
-            props?.amplifyAppName ||
-            process.env.AMPLIFY_APP_NAME ||
-            'next-amplify-starter-kit';
+        const appName = props?.amplifyAppName || process.env.AMPLIFY_APP_NAME;
+
+        if (!repoName) {
+            throw new Error(
+                'Repository Name is required. Set REPO_NAME environment variable or pass via context/props.'
+            );
+        }
+
+        if (!appName) {
+            throw new Error(
+                'Amplify App Name is required. Set AMPLIFY_APP_NAME environment variable or pass via props.'
+            );
+        }
 
         // Determine GitHub token source
         // Default: Use Secrets Manager (recommended)

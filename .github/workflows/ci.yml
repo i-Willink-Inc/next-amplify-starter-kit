@@ -5,15 +5,68 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.filter.outputs.apps }}
+      infra: ${{ steps.filter.outputs.infra }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changes
+        id: filter
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_SHA="origin/${{ github.base_ref }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+          
+          # Check if base commit exists (for force push cases etc.)
+          if ! git cat-file -e $BASE_SHA; then
+            echo "Base SHA $BASE_SHA not found, checking against previous commit"
+            BASE_SHA="HEAD^"
+          fi
+
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA)
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -qE '^apps/|^packages/'; then
+            echo "apps=true" >> $GITHUB_OUTPUT
+          else
+            echo "apps=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^infra/'; then
+            echo "infra=true" >> $GITHUB_OUTPUT
+          else
+            echo "infra=false" >> $GITHUB_OUTPUT
+          fi
+
   lint:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ needs.changes.outputs.apps == 'true' || needs.changes.outputs.infra == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -40,6 +93,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: lint
+    if: ${{ needs.changes.outputs.apps == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -63,6 +117,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: lint
+    if: ${{ needs.changes.outputs.apps == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -89,3 +144,107 @@ jobs:
           path: |
             apps/web/.next
           retention-days: 7
+
+  cdk-check:
+    name: CDK Check
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.changes.outputs.infra == 'true' }}
+    env:
+      REPO_NAME: ${{ secrets.REPO_NAME }}
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Install CDK Dependencies
+        working-directory: infra
+        run: npm ci
+
+      - name: CDK Synth
+        working-directory: infra
+        run: npx cdk synth
+
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: cdk-check
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.infra == 'true'
+    env:
+      USE_SECRETS_MANAGER: 'false'
+      GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      REPO_NAME: ${{ secrets.REPO_NAME }}
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+      DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Install CDK Dependencies
+        working-directory: infra
+        run: npm ci
+
+      - name: Create Dummy amplify.yml if missing
+        run: |
+          if [ ! -f amplify.yml ]; then
+            echo "version: 1" > amplify.yml
+          fi
+
+      - name: CDK Deploy
+        working-directory: infra
+        run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+
+      - name: Upload CDK Outputs
+        uses: actions/upload-artifact@v6
+        with:
+          name: cdk-outputs
+          path: infra/cdk-outputs.json
+          retention-days: 7
+
+  deploy-app:
+    name: Trigger Amplify Build
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.apps == 'true'
+    env:
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-northeast-1
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get App ID
+        id: get-app-id
+        run: |
+          if [ -z "$AMPLIFY_APP_NAME" ]; then
+            echo "AMPLIFY_APP_NAME is not set. Skipping."
+            exit 0
+          fi
+          APP_ID=$(aws amplify list-apps --query "apps[?name=='$AMPLIFY_APP_NAME'].appId" --output text)
+          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+      
+      - name: Trigger Amplify Build
+        env:
+          AMPLIFY_APP_ID: ${{ steps.get-app-id.outputs.app_id }}
+        run: |
+          if [ -z "$AMPLIFY_APP_ID" ]; then
+            echo "App ID not found. Skipping build trigger."
+            exit 0
+          fi
+          aws amplify start-job --app-id $AMPLIFY_APP_ID --branch-name main --job-type RELEASE
