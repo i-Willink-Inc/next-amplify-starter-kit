@@ -6,6 +6,16 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - apps
+          - infra
 
 permissions:
   contents: read
@@ -33,6 +43,25 @@ jobs:
         env:
           HEAD_SHA: ${{ github.sha }}
         run: |
+          # Handle Workflow Dispatch (Manual Execution)
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TARGET="${{ inputs.target }}"
+            echo "Manual trigger detected. Target: $TARGET"
+            
+            if [ "$TARGET" == "all" ]; then
+              echo "apps=true" >> $GITHUB_OUTPUT
+              echo "infra=true" >> $GITHUB_OUTPUT
+            elif [ "$TARGET" == "apps" ]; then
+              echo "apps=true" >> $GITHUB_OUTPUT
+              echo "infra=false" >> $GITHUB_OUTPUT
+            elif [ "$TARGET" == "infra" ]; then
+              echo "apps=false" >> $GITHUB_OUTPUT
+              echo "infra=true" >> $GITHUB_OUTPUT
+            fi
+            exit 0 # Skip git diff logic
+          fi
+
+          # Handle Push/PR (Auto Detection)
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             BASE_SHA="origin/${{ github.base_ref }}"
           else
@@ -50,13 +79,13 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if echo "$CHANGED_FILES" | grep -qE '^apps/|^packages/'; then
+          if echo "$CHANGED_FILES" | grep -qE '^apps/|^packages/|^package.json|^pnpm-lock.yaml'; then
             echo "apps=true" >> $GITHUB_OUTPUT
           else
             echo "apps=false" >> $GITHUB_OUTPUT
           fi
 
-          if echo "$CHANGED_FILES" | grep -qE '^infra/'; then
+          if echo "$CHANGED_FILES" | grep -qE '^infra/|^amplify.yml'; then
             echo "infra=true" >> $GITHUB_OUTPUT
           else
             echo "infra=false" >> $GITHUB_OUTPUT
@@ -196,8 +225,10 @@ jobs:
     needs: lint
     if: ${{ needs.changes.outputs.infra == 'true' }}
     env:
-      REPO_NAME: ${{ secrets.REPO_NAME }}
-      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+      REPO_NAME: ${{ secrets.REPO_NAME || 'check-repo' }}
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME || 'check-app' }}
+      CDK_DEFAULT_ACCOUNT: '123456789012'
+      CDK_DEFAULT_REGION: 'ap-northeast-1'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
