@@ -6,6 +6,16 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - apps
+          - infra
 
 permissions:
   contents: read
@@ -33,6 +43,25 @@ jobs:
         env:
           HEAD_SHA: ${{ github.sha }}
         run: |
+          # Handle Workflow Dispatch (Manual Execution)
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TARGET="${{ inputs.target }}"
+            echo "Manual trigger detected. Target: $TARGET"
+            
+            if [ "$TARGET" == "all" ]; then
+              echo "apps=true" >> $GITHUB_OUTPUT
+              echo "infra=true" >> $GITHUB_OUTPUT
+            elif [ "$TARGET" == "apps" ]; then
+              echo "apps=true" >> $GITHUB_OUTPUT
+              echo "infra=false" >> $GITHUB_OUTPUT
+            elif [ "$TARGET" == "infra" ]; then
+              echo "apps=false" >> $GITHUB_OUTPUT
+              echo "infra=true" >> $GITHUB_OUTPUT
+            fi
+            exit 0 # Skip git diff logic
+          fi
+
+          # Handle Push/PR (Auto Detection)
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             BASE_SHA="origin/${{ github.base_ref }}"
           else
@@ -50,13 +79,13 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if echo "$CHANGED_FILES" | grep -qE '^apps/|^packages/'; then
+          if echo "$CHANGED_FILES" | grep -qE '^apps/|^packages/|^package.json|^pnpm-lock.yaml'; then
             echo "apps=true" >> $GITHUB_OUTPUT
           else
             echo "apps=false" >> $GITHUB_OUTPUT
           fi
 
-          if echo "$CHANGED_FILES" | grep -qE '^infra/'; then
+          if echo "$CHANGED_FILES" | grep -qE '^infra/|^amplify.yml'; then
             echo "infra=true" >> $GITHUB_OUTPUT
           else
             echo "infra=false" >> $GITHUB_OUTPUT
@@ -76,16 +105,26 @@ jobs:
           APPS_CHANGED="${{ steps.filter.outputs.apps }}"
           INFRA_CHANGED="${{ steps.filter.outputs.infra }}"
           IS_MAIN="${{ github.ref == 'refs/heads/main' }}"
+          # Check if this is a PR from a fork
+          IS_FORK="false"
+          if [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            IS_FORK="true"
+          fi
           
           if [ "$APPS_CHANGED" == "true" ] || [ "$INFRA_CHANGED" == "true" ]; then
             MISSING_VARS=""
             MISSING_OPTIONAL_VARS=""
             
-            # Always required
-            if [ -z "$REPO_NAME" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }REPO_NAME"; fi
-            if [ -z "$AMPLIFY_APP_NAME" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }AMPLIFY_APP_NAME"; fi
+            # Check Required Variables
+            # For Fork PRs, we skip strict check to allow CI to pass with dummy values later
+            if [ "$IS_FORK" == "false" ]; then
+              if [ -z "$REPO_NAME" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }REPO_NAME"; fi
+              if [ -z "$AMPLIFY_APP_NAME" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }AMPLIFY_APP_NAME"; fi
+            else
+              echo "::warning::Running from Fork. Skipping strict environment variable checks."
+            fi
             
-            # Required for deployment (main branch)
+            # Required for deployment (main branch only)
             if [ "$IS_MAIN" == "true" ]; then
               if [ -z "$AWS_ACCESS_KEY_ID" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }AWS_ACCESS_KEY_ID"; fi
               if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then MISSING_VARS="${MISSING_VARS:+$MISSING_VARS, }AWS_SECRET_ACCESS_KEY"; fi
@@ -196,8 +235,10 @@ jobs:
     needs: lint
     if: ${{ needs.changes.outputs.infra == 'true' }}
     env:
-      REPO_NAME: ${{ secrets.REPO_NAME }}
-      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME }}
+      REPO_NAME: ${{ secrets.REPO_NAME || 'check-repo' }}
+      AMPLIFY_APP_NAME: ${{ secrets.AMPLIFY_APP_NAME || 'check-app' }}
+      CDK_DEFAULT_ACCOUNT: '123456789012'
+      CDK_DEFAULT_REGION: 'ap-northeast-1'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -245,15 +286,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Dummy amplify.yml if missing
-        run: |
-          if [ ! -f amplify.yml ]; then
-            echo "version: 1" > amplify.yml
-          fi
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        id: creds
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
 
       - name: CDK Deploy
         working-directory: infra
-        run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ steps.creds.outputs.aws-account-id }}
+          CDK_DEFAULT_REGION: 'ap-northeast-1'
+        run: pnpm cdk deploy --require-approval never --outputs-file cdk-outputs.json
 
       - name: Upload CDK Outputs
         uses: actions/upload-artifact@v6
